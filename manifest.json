@@ -1,15 +1,35 @@
 {
-  "short_name": "大網サバイバル",
-  "name": "大網先生：自習室の帝王 - Realistic Edition",
+  "name": "大網先生：自習室の帝王",
+  "short_name": "OAMI SURVIVAL",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
   "icons": [
     {
       "src": "icon.png",
-      "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "type": "image/png"
     }
   ],
-  "start_url": "./index.html",
-  "background_color": "#0f172a",
-  "display": "standalone",
-  "theme_color": "#0f172a"
+  "shortcuts": [
+    {
+      "name": "数学の勉強を始める",
+      "short_name": "数学",
+      "url": "index.html?shortcut=math",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "国語の勉強を始める",
+      "short_name": "国語",
+      "url": "index.html?shortcut=japanese",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "英語の勉強を始める",
+      "short_name": "英語",
+      "url": "index.html?shortcut=english",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    }
+  ]
 }
