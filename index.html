@@ -11,7 +11,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Chareink|Noto+Sans+JP:wght@400;500;700;900&family=Roboto+Mono:wght@400;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Roboto+Mono:wght@400;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,7 +20,7 @@
         // ==========================================
         // 🔑 ここにあなたのGemini APIキーを入力してください
         // ==========================================
-        const GEMINI_API_KEY = "AIzaSyAorKSTtiQBjrzf556ZaiW_7bmqKHJKGmo";
+        const GEMINI_API_KEY = "ここにあなたのAPIキーを記述";
     </script>
 
     <style>
@@ -28,7 +28,6 @@
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
         
         /* --- Material 3 iPad Optimized Blue System --- */
-        .m3-surface { background: #132026; color: #e1e3e5; border-radius: 28px; }
         .m3-hud { background: rgba(19, 32, 38, 0.9); backdrop-filter: blur(16px); border-radius: 24px; color: #e1e3e5; padding: 16px 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
         .m3-dialog { background: #1a2c34; color: #e1e3e5; border-radius: 28px; box-shadow: 0px 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .m3-card { background: #223742; border-radius: 16px; border: 1px solid #404e56; }
@@ -49,23 +48,31 @@
         
         .m3-overlay-screen { position: absolute; inset: 0; background: #050b0d; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; color: #e1e3e5; padding: 40px; }
         
-        /* Gemini風グラデーションボタン */
+        /* 🎨 Gemini風グラデーション：文字追加＆横長化バージョン */
         #gemini-ai-trigger {
-            position: absolute; bottom: 40px; right: 40px; width: 72px; height: 72px; border-radius: 50%;
+            position: absolute; bottom: 40px; right: 40px; height: 64px; padding: 0 28px; border-radius: 32px;
             background: linear-gradient(45deg, #1a73e8, #9333ea, #ff7300, #1a73e8); background-size: 300% 300%;
             animation: geminiGradient 6s ease infinite; z-index: 90; pointer-events: auto; box-shadow: 0 8px 32px rgba(147, 51, 234, 0.4);
-            display: flex; align-items: center; justify-content: center; color: white; transition: transform 0.2s;
+            display: flex; align-items: center; gap: 12px; color: white; transition: transform 0.2s; font-weight: 700; font-size: 1.05rem;
         }
-        #gemini-ai-trigger:hover { transform: scale(1.08); }
+        #gemini-ai-trigger:hover { transform: scale(1.05); }
         @keyframes geminiGradient {
             0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
         }
         
-        #ai-dock { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 800px; height: 320px; background: #1a2c34; border-radius: 32px 32px 0 0; z-index: 150; border-top: 1px solid #404e56; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.1); box-shadow: 0 -10px 40px rgba(0,0,0,0.5); }
-        .ai-collapsed { transform: translateX(-50%) translateY(320px); }
+        /* 📱 iPad向け：右側縦長型 Ami AI サイドバー */
+        #ai-dock { 
+            position: absolute; top: 0; right: 0; width: 420px; height: 100%; 
+            background: rgba(26, 44, 52, 0.95); backdrop-filter: blur(20px);
+            z-index: 150; border-left: 1px solid rgba(255,255,255,0.1); 
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column;
+        }
+        .ai-collapsed { transform: translateX(420px); } /* 最初から画面外へ完全に隠す */
         .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
 
-        /* --- 本格的ゲーム起動アニメーション用CSS --- */
+        /* 🎬 起動演出用 */
         #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 13px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 120px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(124, 212, 255, 0.2); }
         .glitch-title { font-size: 4rem; font-weight: 900; font-style: italic; letter-spacing: -2px; color: #ffffff; text-shadow: 0 0 10px rgba(124,212,255,0.5); display: none; margin-bottom: 8px; }
         .boot-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 6px 100%; z-index: 110; pointer-events: none; }
@@ -90,19 +97,20 @@
             <span class="material-icons-outlined text-amber-300">hourglass_top</span>
         </div>
 
-        <div class="absolute top-8 right-24 m3-hud w-56">
+        <div class="absolute top-8 right-[460px] m3-hud w-56">
             <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest mb-1.5 text-right">Suspicion</div>
             <div class="h-2.5 w-full bg-[#334a54] rounded-full overflow-hidden">
                 <div id="suspicion-bar" class="h-full bg-red-400 w-0 transition-all duration-75"></div>
             </div>
         </div>
 
-        <button id="settings-toggle-btn" class="absolute top-8 right-8 w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
+        <button id="settings-toggle-btn" class="absolute top-8 right-[380px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
             <span class="material-icons-outlined text-2xl">settings</span>
         </button>
 
         <button id="gemini-ai-trigger">
-            <span class="material-icons-outlined text-3xl">psychology</span>
+            <span class="material-icons-outlined text-2xl">psychology</span>
+            <span>Ami AIに質問</span>
         </button>
     </div>
 
@@ -126,29 +134,35 @@
         </div>
     </div>
 
-    <div id="ai-dock" class="ai-collapsed p-5 flex flex-col pointer-events-auto">
-        <div id="ai-drag-handle" class="w-full flex flex-col items-center justify-center cursor-pointer pb-3">
-            <div class="w-12 h-1.5 bg-[#8a9296] rounded-full mb-2"></div>
-            <div class="text-sm font-bold text-white flex items-center gap-2">
-                <span class="material-icons-outlined text-lg text-[#7cd4ff]">smart_toy</span> Ami AI（大網先生の脳内）
+    <div id="ai-dock" class="ai-collapsed p-6 pointer-events-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-[#404e56] mb-4">
+            <div class="text-base font-bold text-white flex items-center gap-2">
+                <span class="material-icons-outlined text-xl text-[#7cd4ff]">smart_toy</span> Ami AI
             </div>
+            <button id="ai-close-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-[#bbe6ff]">
+                <span class="material-icons-outlined text-2xl">close</span>
+            </button>
         </div>
         
-        <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0b151a] rounded-2xl text-sm space-y-2 border border-[#404e56] text-[#e1e3e5] font-mono">
+        <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0b151a] rounded-2xl text-sm space-y-3 border border-[#404e56] text-[#e1e3e5] font-mono">
             <div class="text-red-300 font-bold">大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？」</div>
         </div>
 
-        <div class="flex items-center gap-3">
-            <label class="w-12 h-12 m3-btn-tonal rounded-full cursor-pointer flex items-center justify-center text-[#bbe6ff] p-0">
-                <span class="material-icons-outlined text-2xl">add_photo_alternate</span>
-                <input type="file" id="ai-file-input" accept="image/*" class="hidden">
-            </label>
-            <input type="text" id="ai-text-input" placeholder="解けない問題をここに打ち込め、叩き直してやる..." class="flex-grow m3-input rounded-full text-sm px-5 h-12">
-            <button id="ai-send-btn" class="w-12 h-12 m3-btn-primary rounded-full flex items-center justify-center p-0">
-                <span class="material-icons-outlined text-xl">send</span>
-            </button>
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-3">
+                <label class="w-12 h-12 m3-btn-tonal rounded-full cursor-pointer flex items-center justify-center text-[#bbe6ff] p-0">
+                    <span class="material-icons-outlined text-2xl">add_photo_alternate</span>
+                    <input type="file" id="ai-file-input" accept="image/*" class="hidden">
+                </label>
+                <div id="file-preview-name" class="text-xs text-[#bbe6ff] truncate italic hidden"></div>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="text" id="ai-text-input" placeholder="解けない問題をここに打ち込め..." class="flex-grow m3-input rounded-full text-sm px-5 h-12">
+                <button id="ai-send-btn" class="w-12 h-12 m3-btn-primary rounded-full flex items-center justify-center p-0">
+                    <span class="material-icons-outlined text-xl">send</span>
+                </button>
+            </div>
         </div>
-        <div id="file-preview-name" class="text-xs text-[#bbe6ff] px-14 mt-1.5 hidden italic"></div>
     </div>
 
     <div id="settings-dialog" class="hidden absolute inset-0 bg-black/70 backdrop-blur-md z-[300] flex items-center justify-center p-6">
@@ -199,12 +213,9 @@
         </div>
     </div>
 
-    <div id="warning-vignette"></div>
     <div id="start-screen" class="m3-overlay-screen">
         <div class="boot-scanline"></div>
-        
         <div id="boot-emoji" class="text-9xl mb-6 select-none opacity-0 transition-opacity duration-1000">👨‍🦲</div>
-        
         <h1 id="boot-title" class="glitch-title">OAMI SURVIVAL</h1>
         <p id="boot-sub" class="text-[#bbe6ff] mb-8 text-base max-w-md leading-relaxed opacity-0 transition-opacity duration-1000">目を離せば大網先生の怒りがバッジに蓄積される。<br>最新鋭のリアルな自習空間へようこそ。</p>
         
@@ -234,7 +245,7 @@
         function runBootSequence() {
             const container = document.getElementById('start-screen');
             const logBox = document.getElementById('boot-log-text');
-            container.classList.add('pulse-alert'); // 画面の赤い警告フラッシュ
+            container.classList.add('pulse-alert');
 
             let lineIndex = 0;
             function printLine() {
@@ -245,16 +256,14 @@
                     logBox.appendChild(line);
                     document.getElementById('boot-log-container').scrollTop = document.getElementById('boot-log-container').scrollHeight;
                     lineIndex++;
-                    setTimeout(printLine, 250); // ログ流速スピード
+                    setTimeout(printLine, 250);
                 } else {
-                    // ログ完了後のゲームタイトル展開
                     setTimeout(() => {
                         document.getElementById('boot-log-container').style.display = 'none';
                         document.getElementById('boot-emoji').classList.remove('opacity-0');
                         const title = document.getElementById('boot-title');
                         title.style.display = 'block';
                         
-                        // グリッチ風フラッシュ
                         let f = 0;
                         const interval = setInterval(() => {
                             title.style.opacity = (f % 2 === 0) ? '0.3' : '1';
@@ -297,7 +306,7 @@
                 if(timerSecondsLeft === 0) {
                     if(timerState === 'STUDY') {
                         timerState = 'BREAK'; timerSecondsLeft = breakMinutes * 60;
-                        alert("大網先生「よし、時間だ。5分間の休憩を許可する。ただし部屋から出るなよ」");
+                        alert("大網先生「よし、時間だ。5分間の休憩を許可する」");
                     } else {
                         timerState = 'STUDY'; timerSecondsLeft = studyMinutes * 60;
                         alert("大網先生「休憩終わりだ！直ちに自習を再開しろ！」");
@@ -307,7 +316,7 @@
             }
         }, 1000);
 
-        // --- Badge API：怒り蓄積 ---
+        // --- Badge API ---
         let offlineAngerCount = parseInt(localStorage.getItem('offlineAnger')) || 0;
         function updateAngerBadge(count) {
             if ('setAppBadge' in navigator) {
@@ -323,20 +332,20 @@
                 if (addedAnger > 0) { offlineAngerCount += addedAnger; updateAngerBadge(offlineAngerCount); }
             }
             if (offlineAngerCount > 0) {
-                alert(`大網先生 suicide「私が不在の間、アイコンの怒りバッジが【${offlineAngerCount}】まで跳ね上がっているぞ。サボり魔め！」`);
+                alert(`大網先生「私が不在の間、アイコンの怒りバッジが【${offlineAngerCount}】まで跳ね上がっているぞ。サボり魔め！」`);
                 offlineAngerCount = 0; updateAngerBadge(0);
             }
         });
         window.addEventListener('blur', () => localStorage.setItem('lastActiveTime', Date.now().toString()));
 
-        // Shortcuts & Camo
+        // Camo Screens
         const urlParams = new URLSearchParams(window.location.search);
         let initialCamo = urlParams.get('shortcut') || 'math';
         const camoTemplates = {
             math: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400 flex items-center gap-0.5"><span class="material-icons-outlined text-sm">functions</span> Advanced Mathematics</span></div><div class="space-y-2 text-slate-600"><div class="h-2 w-full bg-slate-200 rounded"></div><div class="my-3 p-4 bg-slate-100 border rounded text-center font-serif text-slate-600 italic text-sm">f(x) = ∫[a,b] sin(x²) dx + cos(y)dy</div></div>`,
             studysapuri: `<div class="w-full h-full flex flex-col bg-slate-950 text-white p-0"><div class="bg-slate-900 px-4 py-2 flex items-center gap-2 text-xs font-bold border-b border-slate-800"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div><span>第4講 英文法の極意（特別配信）</span></div><div class="flex-grow flex bg-slate-900 items-center justify-center text-center font-bold text-cyan-400 text-sm animate-pulse">[ 講師：大網先生特選ゼミ ]</div></div>`,
             english: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400">English Advanced Reading</span></div><div class="space-y-3 text-xs text-slate-700 font-serif"><p class="font-bold text-sm">The Paradigm Shift in Modern Education.</p><p>It is universally acknowledged that a dedicated, strict instructor fosters an unmatched environment for high-concentration study structures...</p></div>`,
-            japanese: `<div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-3 font-serif"><div class="text-[10px] text-slate-400 border-b border-orange-200 pb-1 mb-2 flex justify-between"><span>芥川龍之介「羅生門」第一章</span></div><div class="flex flex-row-reverse justify-start h-full text-right"><p class="vertical-text text-sm leading-loose tracking-wide">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。広い門の下には誰もいない。</p></div></div>`
+            japanese: `<div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-3 font-serif"><div class="text-[10px] text-slate-400 border-b border-orange-200 pb-1 mb-2 flex justify-between"><span>芥川龍之介「羅生門」第一章</span></div><div class="flex flex-row-reverse justify-start h-full text-right"><p class="vertical-text text-sm leading-loose tracking-wide">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。</p></div></div>`
         };
         function setCamoScreen(type) {
             const container = document.getElementById('screen-study');
@@ -345,17 +354,18 @@
             if (radio) radio.checked = true;
         }
 
-        // --- Ami AI (Gemini API 連携 - コード埋め込み型) ---
+        // --- 🤖 Ami AI サイドバー＆Gemini風タイピング演出システム ---
         let selectedBase64Image = null;
         const aiTrigger = document.getElementById('gemini-ai-trigger');
         const aiDock = document.getElementById('ai-dock');
+        const aiCloseBtn = document.getElementById('ai-close-sidebar');
         
         aiTrigger.onclick = (e) => { e.stopPropagation(); aiDock.classList.toggle('ai-collapsed'); };
-        document.getElementById('ai-drag-handle').onclick = () => aiDock.classList.add('ai-collapsed');
+        aiCloseBtn.onclick = () => aiDock.classList.add('ai-collapsed');
 
         document.getElementById('ai-file-input').onchange = (e) => {
             const file = e.target.files[0]; if (!file) return;
-            document.getElementById('file-preview-name').innerText = `添付済み: ${file.name}`;
+            document.getElementById('file-preview-name').innerText = `📎 ${file.name}`;
             document.getElementById('file-preview-name').classList.remove('hidden');
             const reader = new FileReader();
             reader.onload = (evt) => selectedBase64Image = evt.target.result.split(',')[1];
@@ -370,10 +380,31 @@
             document.getElementById('settings-dialog').classList.add('hidden');
         };
 
+        // 📝 Gemini風文字タイピングエフェクト関数
+        function typeWriterEffect(element, fullText, speed = 25) {
+            let i = 0;
+            element.innerHTML = ""; // 初期化
+            function type() {
+                if (i < fullText.length) {
+                    // 改行コードをM3ログに正しく反映
+                    if (fullText.substr(i, 4) === "<br>") {
+                        element.innerHTML += "<br>"; i += 4;
+                    } else if (fullText.charAt(i) === "\n") {
+                        element.innerHTML += "<br>"; i++;
+                    } else {
+                        element.innerHTML += fullText.charAt(i); i++;
+                    }
+                    document.getElementById('ai-chat-log').scrollTop = document.getElementById('ai-chat-log').scrollHeight;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
         document.getElementById('ai-send-btn').onclick = async () => {
             const textInput = document.getElementById('ai-text-input').value.trim();
             if (GEMINI_API_KEY === "ここにあなたのAPIキーを記述" || !GEMINI_API_KEY) { 
-                alert('ソースコード最上部の GEMINI_API_KEY に正しいキーを記述してください。'); 
+                alert('ソースコード22行目の GEMINI_API_KEY に正しいキーを記述してください。'); 
                 return; 
             }
             if (!textInput && !selectedBase64Image) return;
@@ -403,13 +434,17 @@
                 });
                 const data = await response.json();
                 const replyText = data.candidates[0].content.parts[0].text;
-                systemMsgHtml.classList.remove('animate-pulse'); systemMsgHtml.className = "text-red-300 font-bold";
-                systemMsgHtml.innerHTML = `大網先生「${replyText.replace(/\n/g, '<br>')}」`;
+                
+                // アニメーションを解いてタイピング演出へ移管
+                systemMsgHtml.classList.remove('animate-pulse'); 
+                systemMsgHtml.className = "text-red-300 font-bold";
+                
+                // タイピング処理のキックオフ
+                typeWriterEffect(systemMsgHtml, `大網先生「${replyText}`);
             } catch (err) {
-                systemMsgHtml.className = "text-amber-400"; systemMsgHtml.innerText = "大網先生「通信エラーだ。貴様のキーか回線の詰めが甘い！」";
+                systemMsgHtml.className = "text-amber-400"; systemMsgHtml.innerText = "大網先生「通信エラーだ。貴様のキーの詰めが甘い！」";
             }
             selectedBase64Image = null; document.getElementById('file-preview-name').classList.add('hidden');
-            chatLog.scrollTop = chatLog.scrollHeight;
         };
 
         // --- 設定ダイアログ処理 ---
@@ -427,9 +462,7 @@
 
         function createPatternTexture(type, baseColorStr, patternColorStr) {
             const canvas = document.createElement('canvas'); canvas.width = 64; canvas.height = 64;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = baseColorStr; ctx.fillRect(0,0,64,64);
-            ctx.fillStyle = patternColorStr;
+            const ctx = canvas.getContext('2d'); ctx.fillStyle = baseColorStr; ctx.fillRect(0,0,64,64); ctx.fillStyle = patternColorStr;
             if(type === 'striped') { ctx.fillRect(0,0,64,12); ctx.fillRect(0,32,64,12); } 
             else if(type === 'checked') { ctx.fillRect(0,0,32,32); ctx.fillRect(32,32,32,32); }
             return new THREE.CanvasTexture(canvas);
@@ -528,7 +561,6 @@
             window.addEventListener('mousedown', startAction); window.addEventListener('mouseup', stopAction);
             window.addEventListener('touchstart', startAction); window.addEventListener('touchend', stopAction);
             
-            // ページロードと同時にアニメーションを走らせる
             runBootSequence();
             animate();
         }
