@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>大網先生：自習室の帝王 - Premium PWA Edition</title>
+    <title>大網先生：自習室の帝王 - Absolute Realism Edition</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="manifest" href="manifest.json">
@@ -17,47 +17,50 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        /* iPadのダブルタップズームや画面の予期せぬズレ・スクロールを徹底的に防ぐCSS */
+        /* iPad第10世代の4:3画面＆iOS Safariの下部バーによる余白を根絶するCSS */
         html, body { 
             margin: 0; 
             padding: 0;
             overflow: hidden; 
-            background: #0b151a; 
+            background: #050b0d; 
             width: 100vw; 
             height: 100vh;
+            /* iOSの底面バーの干渉を防ぐ最新の動的ビューポート高 */
+            height: 100dvh; 
             position: fixed;
             top: 0;
             left: 0;
-            /* タップ時のズームジェスチャーを無効化 */
             touch-action: manipulation; 
             -webkit-overflow-scrolling: auto;
             -webkit-user-select: none;
             user-select: none;
             font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+            box-sizing: border-box;
+            padding-bottom: env(safe-area-inset-bottom); /* PWA化の際の余白対策 */
         }
 
-        #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
+        #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; height: 100dvh; }
         
         /* --- Material 3 Design System --- */
-        .m3-hud { background: rgba(19, 32, 38, 0.85); backdrop-filter: blur(16px); border-radius: 24px; color: #e1e3e5; padding: 16px 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
-        .m3-dialog { background: #1a2c34; color: #e1e3e5; border-radius: 28px; box-shadow: 0px 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
-        .m3-card { background: #223742; border-radius: 16px; border: 1px solid #404e56; }
+        .m3-hud { background: rgba(15, 27, 33, 0.9); backdrop-filter: blur(20px); border-radius: 24px; color: #e1e3e5; padding: 14px 24px; box-shadow: 0 12px 32px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); }
+        .m3-dialog { background: #13222a; color: #e1e3e5; border-radius: 28px; box-shadow: 0px 16px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.08); }
+        .m3-card { background: #1c2f38; border-radius: 16px; border: 1px solid #344851; }
         
-        /* Buttons */
-        .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
+        /* Buttons & Inputs */
+        .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
         .m3-btn-primary:hover { background: #b3e5ff; transform: scale(1.02); }
-        .m3-btn-tonal { background: #334a54; color: #bbe6ff; border-radius: 100px; font-weight: 500; transition: all 0.2s; padding: 12px 28px; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
-        .m3-btn-tonal:hover { background: #455f6b; }
-        .m3-btn-icon { background: #1a2c34; color: #bbe6ff; border-radius: 100px; transition: all 0.2s; border: 1px solid #404e56; z-index: 250; pointer-events: auto; touch-action: manipulation; }
-        .m3-btn-icon:hover { background: #334a54; }
+        .m3-btn-tonal { background: #2a3f48; color: #bbe6ff; border-radius: 100px; font-weight: 500; transition: all 0.2s; padding: 12px 28px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
+        .m3-btn-tonal:hover { background: #3a5460; }
+        .m3-btn-icon { background: #13222a; color: #bbe6ff; border-radius: 100px; transition: all 0.2s; border: 1px solid #344851; z-index: 250; pointer-events: auto; touch-action: manipulation; }
+        .m3-btn-icon:hover { background: #2a3f48; }
+        .m3-input { background: #081014; border: 1px solid #717d84; color: #e1e3e5; border-radius: 12px; padding: 12px 16px; transition: all 0.2s; pointer-events: auto; }
         
-        .m3-input { background: #0b151a; border: 1px solid #8a9296; color: #e1e3e5; border-radius: 8px; padding: 10px 14px; transition: all 0.2s; pointer-events: auto; }
+        /* カモフラージュスマホデバイス（位置調整） */
+        #youtube-device { position: absolute; bottom: 25%; left: 50%; transform: translateX(-50%); width: 440px; height: 250px; border-radius: 36px; overflow: hidden; border: 12px solid #0f1b21; background: #fff; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .active-view { transform: translateX(-50%) translateY(-30px) scale(1.05); }
+        #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 20%, rgba(255, 50, 50, 0.5) 100%); opacity: 0; transition: opacity 0.15s; z-index: 40; }
         
-        #youtube-device { position: absolute; bottom: 290px; left: 50%; transform: translateX(-50%); width: 460px; height: 260px; border-radius: 32px; overflow: hidden; border: 12px solid #132026; background: #fff; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); transition: transform 0.15s ease-out; }
-        .active-view { transform: translateX(-50%) translateY(-20px) scale(1.03); }
-        #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 30%, rgba(255, 180, 180, 0.4) 100%); opacity: 0; transition: opacity 0.2s; z-index: 40; }
-        
-        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; background: #050b0d; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
+        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100h; height: 100dvh; background: #04080a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
         
         #gemini-ai-trigger {
             position: absolute; bottom: 40px; right: 40px; height: 64px; padding: 0 28px; border-radius: 32px;
@@ -66,41 +69,37 @@
             display: flex; align-items: center; gap: 12px; color: white; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 700; font-size: 1.05rem; touch-action: manipulation;
         }
         #gemini-ai-trigger.click-pop { transform: scale(0.85) translateY(10px); opacity: 0.6; }
-        @keyframes geminiGradient {
-            0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
-        }
+        @keyframes geminiGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        /* Ami AI 縦長サイドバー */
+        /* Ami AI サイドバー */
         #ai-dock { 
-            position: absolute; top: 0; right: 0; width: 420px; height: 100%; 
-            background: rgba(26, 44, 52, 0.95); backdrop-filter: blur(20px);
-            z-index: 150; border-left: 1px solid rgba(255,255,255,0.1); 
+            position: absolute; top: 0; right: 0; width: 420px; height: 100%; height: 100dvh;
+            background: rgba(19, 34, 42, 0.96); backdrop-filter: blur(24px);
+            z-index: 150; border-left: 1px solid rgba(255,255,255,0.08); 
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-            box-shadow: -10px 0 40px rgba(0,0,0,0.5); display: flex; flex-direction: column;
+            box-shadow: -15px 0 50px rgba(0,0,0,0.6); display: flex; flex-direction: column;
         }
         .ai-collapsed { transform: translateX(420px); }
         .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
 
-        #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 13px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 120px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(124, 212, 255, 0.2); }
-        .glitch-title { font-size: 4rem; font-weight: 900; font-style: italic; letter-spacing: -2px; color: #ffffff; text-shadow: 0 0 10px rgba(124,212,255,0.5); display: none; margin-bottom: 8px; }
-        .boot-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 6px 100%; z-index: 510; pointer-events: none; }
-        .pulse-alert { animation: redAlertEffect 0.6s ease-out 3; }
-        @keyframes redAlertEffect {
-            0% { background-color: #0b151a; } 50% { background-color: #401015; } 100% { background-color: #0b151a; }
-        }
+        #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 13px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 120px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(124, 212, 255, 0.2); }
+        .glitch-title { font-size: 3.5rem; font-weight: 900; font-style: italic; letter-spacing: -1px; color: #ffffff; text-shadow: 0 0 12px rgba(124,212,255,0.4); display: none; margin-bottom: 8px; }
+        .boot-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; z-index: 510; pointer-events: none; }
+        .pulse-alert { animation: redAlertEffect 0.5s ease-out 2; }
+        @keyframes redAlertEffect { 0% { background-color: #050b0d; } 50% { background-color: #380d11; } 100% { background-color: #050b0d; } }
     </style>
 </head>
 <body>
     <div id="ui-layer">
         <div class="absolute top-8 left-8 m3-hud min-w-[160px]">
-            <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest">Score</div>
+            <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest">自習継続 Score</div>
             <div id="score-text" class="text-4xl font-black text-[#7cd4ff]">0000</div>
         </div>
 
         <div class="absolute top-8 right-[240px] m3-hud w-56">
-            <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest mb-1.5 text-right">Suspicion</div>
-            <div class="h-2.5 w-full bg-[#334a54] rounded-full overflow-hidden">
-                <div id="suspicion-bar" class="h-full bg-red-400 w-0 transition-all duration-75"></div>
+            <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest mb-1.5 text-right">大網先生の不審度</div>
+            <div class="h-2.5 w-full bg-[#1c2f38] rounded-full overflow-hidden">
+                <div id="suspicion-bar" class="h-full bg-red-500 w-0 transition-all duration-75"></div>
             </div>
         </div>
 
@@ -119,7 +118,7 @@
     </div>
 
     <div id="youtube-device" style="pointer-events: none; z-index: 45;">
-        <div id="screen-study" class="w-full h-full p-5 flex flex-col bg-[#fafafa] overflow-hidden text-slate-800"></div>
+        <div id="screen-study" class="w-full h-full p-5 flex flex-col bg-[#fcfbfa] overflow-hidden text-slate-800"></div>
         <div id="screen-youtube" class="hidden w-full h-full bg-black flex flex-col">
             <div class="p-3 flex items-center gap-1 bg-zinc-900">
                 <span class="text-red-600 font-black text-base tracking-tighter">YouTube<span class="bg-red-600 text-white text-[9px] px-1 ml-1 rounded-sm">JP</span></span>
@@ -138,8 +137,10 @@
         </div>
     </div>
 
+    <div id="warning-vignette"></div>
+
     <div id="ai-dock" class="ai-collapsed p-6 pointer-events-auto">
-        <div class="flex items-center justify-between pb-4 border-b border-[#404e56] mb-4">
+        <div class="flex items-center justify-between pb-4 border-b border-[#344851] mb-4">
             <div class="text-base font-bold text-white flex items-center gap-2">
                 <span class="material-icons-outlined text-xl text-[#7cd4ff]">smart_toy</span> Ami AI
             </div>
@@ -148,7 +149,7 @@
             </button>
         </div>
         
-        <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0b151a] rounded-2xl text-sm space-y-3 border border-[#404e56] text-[#e1e3e5] font-mono">
+        <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#081014] rounded-2xl text-sm space-y-3 border border-[#344851] text-[#e1e3e5] font-mono">
             <div id="ai-greeting-text" class="text-red-300 font-bold">大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？」</div>
         </div>
 
@@ -169,31 +170,28 @@
         </div>
     </div>
 
-    <div id="pomodoro-screen" class="hidden fixed inset-0 bg-[#0b151a]/95 backdrop-blur-xl z-[400] flex flex-col items-center justify-center p-6">
+    <div id="pomodoro-screen" class="hidden fixed inset-0 bg-[#081014]/96 backdrop-blur-xl z-[400] flex flex-col items-center justify-center p-6">
         <div class="text-center max-w-md w-full">
             <div id="pomo-status-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8">
                 <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME
             </div>
-            
             <div id="pomo-clock" class="text-8xl font-thin font-mono text-slate-200 tracking-tight mb-12 select-none">25:00</div>
-            
             <div class="flex items-center justify-center gap-4 mb-16">
                 <button id="pomo-start-pause-btn" class="w-20 h-20 rounded-full bg-[#7cd4ff] text-[#003547] flex items-center justify-center shadow-xl transition-transform active:scale-95">
                     <span id="pomo-ctrl-icon" class="material-icons-outlined text-3xl font-bold">play_arrow</span>
                 </button>
-                <button id="pomo-reset-btn" class="w-14 h-14 rounded-full bg-[#334a54] text-[#bbe6ff] flex items-center justify-center shadow-md transition-transform active:scale-95">
+                <button id="pomo-reset-btn" class="w-14 h-14 rounded-full bg-[#2a3f48] text-[#bbe6ff] flex items-center justify-center shadow-md transition-transform active:scale-95">
                     <span class="material-icons-outlined text-xl">refresh</span>
                 </button>
             </div>
-
             <button id="pomo-close-btn" class="m3-btn-tonal text-sm px-8 py-3">
                 <span class="material-icons-outlined text-sm">visibility</span> 自習監視状況を覗く
             </button>
         </div>
     </div>
 
-    <div id="settings-dialog" class="hidden absolute inset-0 bg-black/70 backdrop-blur-md z-[300] flex items-center justify-center p-6">
-        <div class="m3-dialog w-full max-w-lg p-8 flex flex-col max-h-[90vh] pointer-events-auto">
+    <div id="settings-dialog" class="hidden absolute inset-0 bg-black/75 backdrop-blur-md z-[300] flex items-center justify-center p-6">
+        <div class="m3-dialog w-full max-w-lg p-8 flex flex-col max-h-[85vh] pointer-events-auto">
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-2xl font-bold text-white flex items-center gap-2">
                     <span class="material-icons-outlined text-[#7cd4ff] text-3xl">tune</span> 自習環境設定
@@ -206,7 +204,6 @@
             <div class="flex-grow overflow-y-auto space-y-6 pr-2">
                 <div class="p-5 m3-card">
                     <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">badge</span> 塾生ユーザー名登録</h3>
-                    <p class="text-xs text-slate-400 mb-3 leading-relaxed">大網先生や通知システムに呼ばれたいお前の名前を指定しろ。</p>
                     <input type="text" id="user-nickname-input" placeholder="（未設定時は「お前」）" class="w-full m3-input text-sm">
                 </div>
 
@@ -227,7 +224,6 @@
 
                 <div class="p-5 m3-card">
                     <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">campaign</span> 監視連動システムテスト</h3>
-                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">バックグラウンド環境移行時に大網先生が適切に激怒するかを今すぐ模擬チェックします。</p>
                     <button id="test-notification-btn" class="w-full m3-btn-tonal py-3 text-sm"><span class="material-icons-outlined text-sm">notifications_active</span> テスト通知を送信する</button>
                 </div>
 
@@ -256,7 +252,7 @@
         <div class="boot-scanline"></div>
         <div id="boot-emoji" class="text-9xl mb-6 select-none opacity-0 transition-opacity duration-1000">👨‍🦲</div>
         <h1 id="boot-title" class="glitch-title">OAMI SURVIVAL</h1>
-        <p id="boot-sub" class="text-[#bbe6ff] mb-8 text-base max-w-md leading-relaxed opacity-0 transition-opacity duration-1000">目を離せば大網先生の怒りがバッジに蓄積される。<br>最新鋭のリアルな自習空間へようこそ。</p>
+        <p id="boot-sub" class="text-[#bbe6ff] mb-8 text-base max-w-md leading-relaxed opacity-0 transition-opacity duration-1000">目を離せば大網先生の怒りが蓄積される。<br>最新鋭のリアルな自習空間へようこそ。</p>
         
         <div id="boot-log-container">
             <div id="boot-log-text"></div>
@@ -276,35 +272,31 @@
             return savedName && savedName.trim() !== "" ? savedName.trim() : "お前";
         }
 
-        // --- 📡 【超重要】本物の分離型 sw.js を登録するシステム ---
+        // 📡 Service Worker 登録確認
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log("分離型 Service Worker 登録成功！", reg))
-                .catch(err => console.error("SW 登録失敗。ファイル名を確認してね: ", err));
+                .then(reg => console.log("Service Worker Active", reg))
+                .catch(err => console.error("SW Register Fail: ", err));
             });
         }
 
-        // iPadでのダブルタップによる誤動作・ズレをJS側でも完全防止
+        // iPadでのダブルタップによるズーム無効化ロジック
         let lastTouchEnd = 0;
         document.documentElement.addEventListener('touchend', (event) => {
             const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                event.preventDefault(); // ダブルタップズームの挙動を完全にシャットアウト
-            }
+            if (now - lastTouchEnd <= 300) { event.preventDefault(); }
             lastTouchEnd = now;
         }, { passive: false });
 
-        // 起動演出ログ
         const logLines = [
-            "CRITICAL: SECURITY BREACH DETECTED...",
-            "INITIALIZING OAMI MONITORING CORE V3...",
-            "LOADING CLASSROOM 3D ENVIRONMENT [OK]",
-            "GENERATING STUDENT TEXTURE MESHES [OK]",
-            "CONNECTING TO AMI AI BRAIN SYSTEM...",
-            "SYNCHRONIZING RECENT ANGER BADGES...",
-            "WARNING: SENSEI'S VISION IS FULLY CHARGED.",
-            "READY FOR APP INTRUSION OVERLAY."
+            "CRITICAL: MONITORING CORE INITIALIZED V3.2...",
+            "LOADING CLASSROOM DATA STRUCTURES [OK]",
+            "SETTING CAMERA CLIPPING PLANE SAFE-ZONE...",
+            "FIXING SENSEI MESH COORDINATES TO ORIGIN [OK]",
+            "CONNECTING TO AMI AI INTERACTION HUB...",
+            "WARNING: HIGH REALISM LIGHTING APPLIED.",
+            "READY TO INITIATE INTENSE STUDY ENVIRONMENT."
         ];
 
         function runBootSequence() {
@@ -321,7 +313,7 @@
                     logBox.appendChild(line);
                     document.getElementById('boot-log-container').scrollTop = document.getElementById('boot-log-container').scrollHeight;
                     lineIndex++;
-                    setTimeout(printLine, 120);
+                    setTimeout(printLine, 100);
                 } else {
                     setTimeout(() => {
                         document.getElementById('boot-log-container').style.display = 'none';
@@ -339,14 +331,14 @@
                                 const actions = document.getElementById('boot-actions');
                                 actions.classList.remove('opacity-0', 'pointer-events-none');
                             }
-                        }, 60);
-                    }, 300);
+                        }, 50);
+                    }, 200);
                 }
             }
-            setTimeout(printLine, 300);
+            setTimeout(printLine, 200);
         }
 
-        // ポモドーロタイマー
+        // ポモドーロタイマーロジック
         let pomoMinutesStudy = 25;
         let pomoMinutesBreak = 5;
         let pomoSecondsLeft = pomoMinutesStudy * 60;
@@ -387,13 +379,13 @@
                             pomoSecondsLeft = pomoMinutesBreak * 60;
                             pomoBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> BREAK TIME`;
                             pomoBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-300 text-xs font-bold tracking-widest uppercase mb-8";
-                            alert(`大網先生「よし、時間だ。${userName}、休憩を許可する。頭を冷やしてこい」`);
+                            alert(`大網先生「時間だ。${userName}、小休憩を挟め。ただし気を緩めるなよ」`);
                         } else {
                             pomoTimerState = 'STUDY';
                             pomoSecondsLeft = pomoMinutesStudy * 60;
                             pomoBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME`;
                             pomoBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8";
-                            alert(`大網先生「休憩終了だ、${userName}！再び集中しろ！」`);
+                            alert(`大網先生「休憩終わりだ、${userName}！机に向かえ！」`);
                         }
                         updatePomoClockUI();
                     }
@@ -412,7 +404,7 @@
             updatePomoClockUI();
         };
 
-        // 🔔 プッシュ通知コアシステム（sw.js 経由で確実に起こす）
+        // 🔔 プッシュ通知コアシステム
         function triggerPushNotification(title, body) {
             if (Notification.permission === 'granted' && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.ready.then(registration => {
@@ -424,22 +416,17 @@
                     });
                 });
             } else if (Notification.permission === 'granted') {
-                // 初回読み込み用フォールバック
                 new Notification(title, { body: body });
             }
         }
 
         document.getElementById('test-notification-btn').onclick = () => {
             const userName = getUserName();
-            triggerPushNotification(
-                '🔥 大網先生の常時監視テスト',
-                `「おい、${userName}！通知テストが通ったな！これで言い訳は一切通用せんぞ！」`
-            );
+            triggerPushNotification('🔥 大網先生の常時監視テスト', `「おい${userName}！通知テスト完了だ。サボったら即座に雷を落とすからな！」`);
         };
 
-        // ⏳ アプリ放置時間（サボり）連動システム
+        // アプリ放置時間連動システム
         let offlineAngerCount = parseInt(localStorage.getItem('offlineAnger')) || 0;
-        
         function updateAngerBadge(count) {
             if ('setAppBadge' in navigator) {
                 if (count > 0) navigator.setAppBadge(count).catch(e => console.log(e));
@@ -451,42 +438,31 @@
         window.addEventListener('focus', () => {
             const userName = getUserName();
             const lastTime = localStorage.getItem('lastActiveTime');
-            
             if (lastTime) {
-                const elapsedMs = Date.now() - parseInt(lastTime);
-                const elapsedSec = Math.floor(elapsedMs / 1000);
-                
+                const elapsedSec = Math.floor((Date.now() - parseInt(lastTime)) / 1000);
                 const addedAnger = Math.floor(elapsedSec / 15);
-                if (addedAnger > 0) { 
-                    offlineAngerCount += addedAnger; 
-                    updateAngerBadge(offlineAngerCount); 
-                }
+                if (addedAnger > 0) { offlineAngerCount += addedAnger; updateAngerBadge(offlineAngerCount); }
 
-                if (elapsedSec >= 120) { // 2分以上（破門級）
+                if (elapsedSec >= 120) {
                     triggerPushNotification('🚨 大網先生の堪忍袋の緒', `「${userName}！！！自習室を何分空けている！？戻ってこないなら叩き出すぞ！！」`);
                     alert(`大網先生「お前が画面を離れてから【${elapsedSec}秒】も経過しているぞ、${userName}！！次はないと思え！！」`);
-                } else if (elapsedSec >= 45) { // 45秒以上（激怒級）
-                    triggerPushNotification('⚡ 大網先生の咆哮', `「おい、${userName}！今すぐ席に戻れ！他人のサボりはお前のサボり、お前のサボりは許さん！」`);
-                    alert(`大網先生「ずいぶんと長い間スマホを手放していたようだな、${userName}。サボり魔のバッジが【${offlineAngerCount}】まで跳ね上がっているぞ！」`);
-                } else if (elapsedSec >= 15) { // 15秒以上（警告級）
-                    triggerPushNotification('📢 大網先生の視線', `「${userName}、席を外してどこへ行っていた？集中力が散漫になっている証拠だぞ。」`);
+                } else if (elapsedSec >= 45) {
+                    triggerPushNotification('⚡ 大網先生の咆哮', `「おい、${userName}！今すぐ席に戻れ！」`);
+                    alert(`大網先生「ずいぶんと長い間スマホを手放していたようだな、${userName}。不審度バッジが溜まっているぞ！」`);
+                } else if (elapsedSec >= 15) {
+                    triggerPushNotification('📢 大網先生の視線', `「${userName}、席を外してどこへ行っていた？」`);
                 }
             }
-            offlineAngerCount = 0; 
-            updateAngerBadge(0);
+            offlineAngerCount = 0; updateAngerBadge(0);
         });
 
-        window.addEventListener('blur', () => {
-            localStorage.setItem('lastActiveTime', Date.now().toString());
-        });
+        window.addEventListener('blur', () => { localStorage.setItem('lastActiveTime', Date.now().toString()); });
 
-        // カモフラ画面
-        const urlParams = new URLSearchParams(window.location.search);
-        let initialCamo = urlParams.get('shortcut') || 'math';
+        // カモフラ画像表示用テンプレート
         const camoTemplates = {
             math: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400 flex items-center gap-0.5"><span class="material-icons-outlined text-sm">functions</span> Advanced Mathematics</span></div><div class="space-y-2 text-slate-600"><div class="h-2 w-full bg-slate-200 rounded"></div><div class="my-3 p-4 bg-slate-100 border rounded text-center font-serif text-slate-600 italic text-sm">f(x) = ∫[a,b] sin(x²) dx + cos(y)dy</div></div>`,
             studysapuri: `<div class="w-full h-full flex flex-col bg-slate-950 text-white p-0"><div class="bg-slate-900 px-4 py-2 flex items-center gap-2 text-xs font-bold border-b border-slate-800"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div><span>第4講 英文法の極意（特別配信）</span></div><div class="flex-grow flex bg-slate-900 items-center justify-center text-center font-bold text-cyan-400 text-sm animate-pulse">[ 講師：大網先生特選ゼミ ]</div></div>`,
-            english: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400">English Advanced Reading</span></div><div class="space-y-3 text-xs text-slate-700 font-serif"><p class="font-bold text-sm">The Paradigm Shift in Modern Education.</p><p>It is universally acknowledged that a dedicated, strict instructor fosters an unmatched environment for high-concentration study structures...</p></div>`,
+            english: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400">English Advanced Reading</span></div><div class="space-y-3 text-xs text-slate-700 font-serif"><p class="font-bold text-sm">The Paradigm Shift in Modern Education.</p><p>It is universally acknowledged that a dedicated, strict instructor fosters an unmatched environment...</p></div>`,
             japanese: `<div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-3 font-serif"><div class="text-[10px] text-slate-400 border-b border-orange-200 pb-1 mb-2 flex justify-between"><span>芥川龍之介「羅生門」第一章</span></div><div class="flex flex-row-reverse justify-start h-full text-right"><p class="vertical-text text-sm leading-loose tracking-wide">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。</p></div></div>`
         };
         function setCamoScreen(type) {
@@ -505,10 +481,7 @@
         aiTrigger.onclick = (e) => { 
             e.stopPropagation(); 
             aiTrigger.classList.add('click-pop');
-            setTimeout(() => {
-                aiTrigger.classList.remove('click-pop');
-                aiDock.classList.toggle('ai-collapsed'); 
-            }, 180);
+            setTimeout(() => { aiTrigger.classList.remove('click-pop'); aiDock.classList.toggle('ai-collapsed'); }, 150);
         };
         aiCloseBtn.onclick = () => aiDock.classList.add('ai-collapsed');
 
@@ -521,7 +494,7 @@
             reader.readAsDataURL(file);
         };
 
-        function typeWriterEffect(element, fullText, speed = 25) {
+        function typeWriterEffect(element, fullText, speed = 20) {
             let i = 0; element.innerHTML = "";
             function type() {
                 if (i < fullText.length) {
@@ -538,11 +511,7 @@
         document.getElementById('ai-send-btn').onclick = async () => {
             const textInput = document.getElementById('ai-text-input').value.trim();
             const userName = getUserName();
-            
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("ここにGeminiの")) { 
-                alert('Ami AIの稼働にはAPIキーの設定が必要です。'); 
-                return; 
-            }
+            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("ここにGeminiの")) { alert('Ami AIの稼働にはAPIキーの設定が必要です。'); return; }
             if (!textInput && !selectedBase64Image) return;
 
             const chatLog = document.getElementById('ai-chat-log');
@@ -554,8 +523,7 @@
             systemMsgHtml.innerText = "大網先生が答案の不備を精査中..."; chatLog.appendChild(systemMsgHtml);
             chatLog.scrollTop = chatLog.scrollHeight;
 
-            const promptText = `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（${userName}）からの質問に徹底的に解説しつつ、お説教を織り交ぜてください。`;
-            let parts = [{ text: promptText + `\nユーザーの質問: ${textInput}` }];
+            let parts = [{ text: `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（${userName}）からの質問に徹底的に解説しつつ、適度にお説教を織り交ぜてください。\n質問: ${textInput}` }];
             if (selectedBase64Image) parts.push({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
 
             try {
@@ -565,8 +533,7 @@
                 });
                 const data = await response.json();
                 const replyText = data.candidates[0].content.parts[0].text;
-                systemMsgHtml.classList.remove('animate-pulse'); 
-                systemMsgHtml.className = "text-red-300 font-bold";
+                systemMsgHtml.classList.remove('animate-pulse'); systemMsgHtml.className = "text-red-300 font-bold";
                 typeWriterEffect(systemMsgHtml, `大網先生「${replyText}`);
             } catch (err) {
                 systemMsgHtml.className = "text-amber-400"; systemMsgHtml.innerText = "大網先生「通信エラーだ！」";
@@ -574,7 +541,6 @@
             selectedBase64Image = null; document.getElementById('file-preview-name').classList.add('hidden');
         };
 
-        // 設定ダイアログ保存
         document.getElementById('save-settings-btn').onclick = () => {
             const inputName = document.getElementById('user-nickname-input').value.trim();
             localStorage.setItem('userNickname', inputName);
@@ -582,26 +548,15 @@
             pomoMinutesBreak = parseInt(document.getElementById('timer-break-input').value) || 5;
             pomoSecondsLeft = pomoMinutesStudy * 60;
             updatePomoClockUI();
-            alert(`大網先生「環境を再構築したぞ、${getUserName()}。一秒も無駄にするな」`);
+            alert(`大網先生「環境を再構築したぞ、${getUserName()}。サボるなよ」`);
             document.getElementById('settings-dialog').classList.add('hidden');
         };
 
-        function loadSavedNickname() {
-            const savedName = localStorage.getItem('userNickname');
-            if (savedName) document.getElementById('user-nickname-input').value = savedName;
-        }
-
-        document.getElementById('settings-toggle-btn').onclick = (e) => { e.stopPropagation(); document.getElementById('settings-dialog').classList.remove('hidden'); };
-        document.getElementById('settings-close-btn').onclick = () => document.getElementById('settings-dialog').classList.add('hidden');
-        document.querySelectorAll('input[name="camo-select"]').forEach(radio => {
-            radio.addEventListener('change', (e) => setCamoScreen(e.target.value));
-        });
-
-        // --- 🎓 Three.js 3Dグラフィックス空間（大網先生完全復活版） ---
+        // --- 🎓 Three.js 3Dグラフィックス空間（大網先生・絶対定着＆超リアル化版） ---
         let scene, camera, renderer, sensei;
         let students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
-        let aiTarget = new THREE.Vector3(0, 0, -8);
+        let aiTarget = new THREE.Vector3(0, 0, -4);
         let aiState = 'WALK'; let aiTimer = 0;
 
         function createPatternTexture(type, baseColorStr, patternColorStr) {
@@ -612,105 +567,158 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // 大網先生＆生徒の3Dメッシュを完全にエラー無く組み立てる関数
+        // 人物3Dアセット生成（原点座標を足元に完全統一してロストを防御）
         function createDetailedPerson(isSensei = false) {
             const group = new THREE.Group();
-            const skinMat = new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.6 });
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.5 });
             let clothMat = isSensei ? 
-                new THREE.MeshStandardMaterial({ color: 0x1e2d3d, roughness: 0.6 }) : 
-                new THREE.MeshStandardMaterial({ map: createPatternTexture('checked', `hsl(${Math.random()*360}, 60%, 45%)`, '#111'), roughness: 0.8 });
+                new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.5 }) : 
+                new THREE.MeshStandardMaterial({ map: createPatternTexture('checked', `hsl(${Math.random()*360}, 50%, 40%)`, '#222'), roughness: 0.7 });
 
-            // トルソー（体）
+            // 体（トルソー）
             const torso = new THREE.Group();
             const chest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.35), clothMat); chest.position.y = 1.25;
-            const waist = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.3), new THREE.MeshStandardMaterial({color:0x222222})); waist.position.y = 0.9;
+            const waist = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.3), new THREE.MeshStandardMaterial({color:0x111111})); waist.position.y = 0.9;
             torso.add(chest, waist);
 
             if (isSensei) {
-                const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.3, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff })); shirt.position.set(0, 1.35, 0.16);
-                const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.28, 0.02), new THREE.MeshStandardMaterial({ color: 0xcc1111 })); tie.position.set(0, 1.25, 0.17);
+                const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.3, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff })); shirt.position.set(0, 1.35, 0.16);
+                const tie = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.28, 0.02), new THREE.MeshStandardMaterial({ color: 0xb91c1c })); tie.position.set(0, 1.25, 0.17);
                 torso.add(shirt, tie);
             }
             group.add(torso);
 
-            // 腕の生成
+            // 腕
             group.armL = new THREE.Group(); group.armR = new THREE.Group();
-            const upperArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.45, 0.18), clothMat); upperArm.position.y = -0.22;
-            group.armL.add(upperArm.clone()); group.armL.position.set(-0.4, 1.4, 0);
-            group.armR.add(upperArm.clone()); group.armR.position.set(0.4, 1.4, 0);
+            const upperArm = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.45, 0.16), clothMat); upperArm.position.y = -0.22;
+            group.armL.add(upperArm.clone()); group.armL.position.set(-0.38, 1.4, 0);
+            group.armR.add(upperArm.clone()); group.armR.position.set(0.38, 1.4, 0);
             group.add(group.armL, group.armR);
 
-            // 足の生成
-            const pantL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.6, 0.22), new THREE.MeshStandardMaterial({ color: 0x151515 })); pantL.position.y = -0.3;
-            group.legL = new THREE.Group(); group.legL.add(pantL); group.legL.position.set(-0.16, 0.75, 0);
+            // 足
+            const pantL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), new THREE.MeshStandardMaterial({ color: 0x111111 })); pantL.position.y = -0.3;
+            group.legL = new THREE.Group(); group.legL.add(pantL); group.legL.position.set(-0.15, 0.75, 0);
             
-            const pantR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.6, 0.22), new THREE.MeshStandardMaterial({ color: 0x151515 })); pantR.position.y = -0.3;
-            group.legR = new THREE.Group(); group.legR.add(pantR); group.legR.position.set(0.16, 0.75, 0);
+            const pantR = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), new THREE.MeshStandardMaterial({ color: 0x111111 })); pantR.position.y = -0.3;
+            group.legR = new THREE.Group(); group.legR.add(pantR); group.legR.position.set(0.15, 0.75, 0);
             group.add(group.legL, group.legR);
 
-            // 頭部の生成
+            // 頭部
             const headGroup = new THREE.Group();
-            const skull = new THREE.Mesh(new THREE.SphereGeometry(0.24, 32, 16), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
+            const skull = new THREE.Mesh(new THREE.SphereGeometry(0.23, 32, 32), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
             
             if (isSensei) {
-                const eyeGeo = new THREE.SphereGeometry(0.035, 8, 8); 
+                // 大網先生専用の威圧的な眼鏡と髭、目を追加
+                const eyeGeo = new THREE.SphereGeometry(0.03, 16, 16); 
                 const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                const eL = new THREE.Mesh(eyeGeo, eyeMat.clone()); eL.position.set(-0.09, 0.05, 0.2);
-                const eR = new THREE.Mesh(eyeGeo, eyeMat.clone()); eR.position.set(0.09, 0.05, 0.2);
-                headGroup.add(eL, eR); 
-                group.eyes = [eL, eR]; // 怒り時に赤く光らせる配列を格納
+                const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.08, 0.04, 0.2);
+                const eR = new THREE.Mesh(eyeGeo, eyeMat); eR.position.set(0.08, 0.04, 0.2);
+                headGroup.add(eL, eR);
+                group.eyes = [eL, eR];
+
+                // 黒縁メガネの表現
+                const glassFrame = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.03), new THREE.MeshStandardMaterial({color:0x000000, roughness:0.2}));
+                glassFrame.position.set(0, 0.04, 0.21); headGroup.add(glassFrame);
             } else {
-                const hairGeo = new THREE.SphereGeometry(0.25, 16, 16, 0, Math.PI * 2, 0, Math.PI / 1.7);
-                const hair = new THREE.Mesh(hairGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 })); hair.scale.set(1.02, 1.05, 1.05); headGroup.add(hair);
+                const hairGeo = new THREE.SphereGeometry(0.24, 16, 16, 0, Math.PI * 2, 0, Math.PI / 1.8);
+                const hair = new THREE.Mesh(hairGeo, new THREE.MeshStandardMaterial({ color: 0x222222 })); hair.scale.set(1.02, 1.04, 1.04); headGroup.add(hair);
             }
-            headGroup.position.y = 1.65; group.add(headGroup); group.head = headGroup;
+            headGroup.position.y = 1.62; group.add(headGroup); group.head = headGroup;
 
             return group;
         }
 
         function init3D() {
-            scene = new THREE.Scene(); scene.background = new THREE.Color(0x132026); scene.fog = new THREE.Fog(0x132026, 15, 50);
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 2.5, 7.5); camera.lookAt(0, 1.2, 0);
+            scene = new THREE.Scene(); 
+            scene.background = new THREE.Color(0x0a1216); 
+            scene.fog = new THREE.FogExp2(0x0a1216, 0.04); // 奥行きのあるリアルな空気感
+
+            // カメラ位置を少し手前に引き、視野角(FOV)を最適化して先生を確実にとらえる
+            camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100); 
+            camera.position.set(0, 2.3, 6.5); 
+            camera.lookAt(0, 1.3, -2);
             
-            renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" }); 
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
             
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-            const mainLight = new THREE.DirectionalLight(0xfffaed, 0.7); mainLight.position.set(10, 25, 10); scene.add(mainLight);
-
-            const blackboard = new THREE.Mesh(new THREE.BoxGeometry(16, 4.5, 0.1), new THREE.MeshStandardMaterial({ color: 0x16351c, roughness: 0.8 })); blackboard.position.set(0, 3.2, -21.8); scene.add(blackboard);
-
-            const floorCanvas = document.createElement('canvas'); floorCanvas.width = 256; floorCanvas.height = 256;
-            const fCtx = floorCanvas.getContext('2d'); fCtx.fillStyle = '#b58a55'; fCtx.fillRect(0,0,256,256); fCtx.fillStyle = '#946f41';
-            for(let i=0; i<256; i+=32) { fCtx.fillRect(i, 0, 2, 256); fCtx.fillRect(0, i, 256, 2); }
-            const floorTex = new THREE.CanvasTexture(floorCanvas); floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(12,12);
-            const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.5 })); floor.rotation.x = -Math.PI / 2; scene.add(floor);
-
-            const deskMat = new THREE.MeshStandardMaterial({ color: 0xbc9466, roughness: 0.5 });
-            const pipeMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.5 });
+            // --- 💡 リアリティ追求型のライティング ---
+            const ambientLight = new THREE.AmbientLight(0x223344, 0.6); scene.add(ambientLight);
             
-            for (let x = -8; x <= 8; x += 4) {
-                for (let z = -14; z <= 2; z += 4) {
+            // 廊下や窓側から差し込む月光風スポットライト（ホラーでリアルな塾の夜間自習室を演出）
+            const moonLight = new THREE.DirectionalLight(0x7cd4ff, 0.8); moonLight.position.set(-15, 20, 5); scene.add(moonLight);
+            
+            // 教壇（黒板）を照らす蛍光灯ダウンライト
+            const roomLight = new THREE.PointLight(0xfff5ea, 0.9, 30); roomLight.position.set(0, 5, -4); scene.add(roomLight);
+
+            // リアルな黒板
+            const blackboard = new THREE.Mesh(new THREE.BoxGeometry(10, 3.2, 0.1), new THREE.MeshStandardMaterial({ color: 0x0f2a1d, roughness: 0.9 })); 
+            blackboard.position.set(0, 2.6, -11.5); scene.add(blackboard);
+
+            // 教壇ステージ（段差）
+            const platform = new THREE.Mesh(new THREE.BoxGeometry(11, 0.25, 3), new THREE.MeshStandardMaterial({ color: 0x47311b, roughness: 0.7 }));
+            platform.position.set(0, 0.125, -10); scene.add(platform);
+
+            // 床（ウッドタイル調テクスチャ表現）
+            const floorCanvas = document.createElement('canvas'); floorCanvas.width = 128; floorCanvas.height = 128;
+            const fCtx = floorCanvas.getContext('2d'); fCtx.fillStyle = '#3a271d'; fCtx.fillRect(0,0,128,128); fCtx.fillStyle = '#261912';
+            for(let i=0; i<128; i+=16) { fCtx.fillRect(i, 0, 1, 128); fCtx.fillRect(0, i, 128, 1); }
+            const floorTex = new THREE.CanvasTexture(floorCanvas); floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(16,16);
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.6 })); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+
+            // 左右のリアルな教室の壁
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x222e35, roughness: 0.8 });
+            const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), wallMat); leftWall.position.set(-8, 3.5, -5); leftWall.rotation.y = Math.PI/2; scene.add(leftWall);
+            const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), wallMat); rightWall.position.set(8, 3.5, -5); rightWall.rotation.y = -Math.PI/2; scene.add(rightWall);
+
+            // 机・椅子・生徒の配置（プレイヤーの周りを囲んで密集感を出す）
+            const deskMat = new THREE.MeshStandardMaterial({ color: 0x6e4726, roughness: 0.6 });
+            const legMat = new THREE.MeshStandardMaterial({ color: 0x2c3539, metalness: 0.4 });
+            const noteMat = new THREE.MeshStandardMaterial({ color: 0xedf2f7 }); // 机の上のノート用
+            
+            for (let x = -5; x <= 5; x += 2.5) {
+                for (let z = -8; z <= 2; z += 3.2) {
+                    if (Math.abs(x) < 0.5 && z > 1.5) continue; // プレイヤーの目の前は空ける
+
                     const deskGroup = new THREE.Group();
-                    const top = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 1.4), deskMat); top.position.y = 0.9; deskGroup.add(top);
-                    const legGeo = new THREE.BoxGeometry(0.06, 0.9, 0.06);
-                    const l1 = new THREE.Mesh(legGeo, pipeMat); l1.position.set(-1.1, 0.45, -0.6); deskGroup.add(l1);
-                    const l2 = new THREE.Mesh(legGeo, pipeMat); l2.position.set(1.1, 0.45, -0.6); deskGroup.add(l2);
+                    const top = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.06, 1.0), deskMat); top.position.y = 0.85; deskGroup.add(top);
+                    
+                    // リアリティ補強：机の上の白い参考書・ノート
+                    const note = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.01, 0.25), noteMat); note.position.set(0.1, 0.88, 0); note.rotation.y = 0.1; deskGroup.add(note);
+
+                    const legGeo = new THREE.BoxGeometry(0.04, 0.85, 0.04);
+                    const l1 = new THREE.Mesh(legGeo, legMat); l1.position.set(-0.75, 0.425, -0.45); deskGroup.add(l1);
+                    const l2 = new THREE.Mesh(legGeo, legMat); l2.position.set(0.75, 0.425, -0.45); deskGroup.add(l2);
+                    const l3 = new THREE.Mesh(legGeo, legMat); l3.position.set(-0.75, 0.425, 0.45); deskGroup.add(l3);
+                    const l4 = new THREE.Mesh(legGeo, legMat); l4.position.set(0.75, 0.425, 0.45); deskGroup.add(l4);
+                    
                     deskGroup.position.set(x, 0, z); scene.add(deskGroup);
                     
-                    if (x !== 0 || z !== 2) {
-                        const s = createDetailedPerson(false); s.position.set(x, 0, z + 1.2); s.rotation.y = Math.PI; s.head.rotation.x = 0.35; scene.add(s); students.push(s);
+                    // 他の自習生徒たち
+                    if (Math.abs(x) > 0.5 || z < -1) {
+                        const s = createDetailedPerson(false); 
+                        s.position.set(x, 0, z + 0.8); 
+                        s.rotation.y = Math.PI; 
+                        s.head.rotation.x = 0.4; // みんな下を向いて猛勉強中
+                        scene.add(s); 
+                        students.push(s);
                     }
                 }
             }
 
-            // ⭐ 大網先生を教室の最前線（教壇）に完全配置！
+            // 👑 【大網先生：完全出現ロジック】
+            // 教壇（段差の上）に絶対にめり込まないようY座標を「0.25（段の高さ）」に設定し、カメラが必ず捉える位置に初期固定。
             sensei = createDetailedPerson(true); 
-            sensei.position.set(0, 0, -16); 
+            sensei.position.set(0, 0.25, -10); 
             scene.add(sensei);
             
-            setCamoScreen(initialCamo); loadSavedNickname(); updatePomoClockUI();
+            setCamoScreen(initialCamo);
+            const savedName = localStorage.getItem('userNickname');
+            if (savedName) document.getElementById('user-nickname-input').value = savedName;
+            updatePomoClockUI();
 
+            // 操作インプット（マルチデバイス対応）
             const startAction = (e) => {
                 if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger') || e.target.closest('#pomodoro-toggle-btn') || e.target.closest('#pomodoro-screen')) return;
                 isWatching = true; document.getElementById('screen-study').classList.add('hidden'); document.getElementById('screen-youtube').classList.remove('hidden'); document.getElementById('youtube-device').classList.add('active-view');
@@ -720,30 +728,41 @@
                 isWatching = false; document.getElementById('screen-study').classList.remove('hidden'); document.getElementById('screen-youtube').classList.add('hidden'); document.getElementById('youtube-device').classList.remove('active-view');
             };
             window.addEventListener('mousedown', startAction); window.addEventListener('mouseup', stopAction);
-            window.addEventListener('touchstart', startAction); window.addEventListener('touchend', stopAction);
+            window.addEventListener('touchstart', startAction, { passive: true }); window.addEventListener('touchend', stopAction, { passive: true });
             
             runBootSequence(); animate();
         }
 
+        // 大網先生の高精度AI・アニメーション処理
         function updateAI() {
             if (!sensei) return;
-            const time = Date.now() * 0.005; aiTimer -= 1;
+            const time = Date.now() * 0.004; aiTimer -= 1;
             
             if (aiState === 'WALK') {
+                // 教壇（段差の上）を左右に鋭く行き来するリアルな巡回挙動
                 let dist = sensei.position.distanceTo(aiTarget);
-                if (dist > 0.4) {
+                if (dist > 0.3) {
                     let dir = aiTarget.clone().sub(sensei.position).normalize();
-                    sensei.position.add(dir.multiplyScalar(0.045));
-                    sensei.rotation.y = THREE.MathUtils.lerp(sensei.rotation.y, Math.atan2(dir.x, dir.z), 0.1);
-                    sensei.legL.rotation.x = Math.sin(time) * 0.45; sensei.legR.rotation.x = Math.cos(time) * 0.45;
-                } else { aiState = 'INSPECT'; aiTimer = 90 + Math.random() * 100; }
+                    sensei.position.add(dir.multiplyScalar(0.035));
+                    sensei.rotation.y = THREE.MathUtils.lerp(sensei.rotation.y, Math.atan2(dir.x, dir.z), 0.15);
+                    sensei.legL.rotation.x = Math.sin(time * 1.5) * 0.4; sensei.legR.rotation.x = Math.cos(time * 1.5) * 0.4;
+                } else { 
+                    aiState = 'INSPECT'; 
+                    aiTimer = 60 + Math.random() * 80; 
+                }
             } else if (aiState === 'INSPECT') {
+                // 立ち止まり、鋭い眼光で生徒たち（プレイヤー側）をギロリと見渡す
                 sensei.legL.rotation.x = 0; sensei.legR.rotation.x = 0;
-                sensei.head.rotation.y = Math.sin(time * 0.35) * 1.2;
-                if (aiTimer <= 0) { aiState = 'WALK'; aiTarget.set((Math.random() - 0.5) * 10, 0, (Math.random() - 0.5) * 16 - 3); }
+                sensei.head.rotation.y = Math.sin(time * 0.5) * 0.8;
+                if (aiTimer <= 0) { 
+                    aiState = 'WALK'; 
+                    // 教壇の範囲内（X軸:-4〜4, Z軸:-10のライン上）で歩くターゲットを再設定
+                    aiTarget.set((Math.random() - 0.5) * 8, 0.25, -10 + (Math.random() - 0.5) * 1); 
+                }
             }
 
-            const playerPos = new THREE.Vector3(0, 0, 5);
+            // プレイヤー（カメラ位置付近）への視線判定
+            const playerPos = new THREE.Vector3(0, 0, 4);
             const dist = sensei.position.distanceTo(playerPos);
             const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(sensei.head.getWorldQuaternion(new THREE.Quaternion()));
             const dot = forward.dot(playerPos.clone().sub(sensei.position).normalize());
@@ -751,17 +770,24 @@
             if (isWatching) {
                 score += 1; document.getElementById('score-text').innerText = score.toString().padStart(4, '0');
                 document.getElementById('yt-progress').style.width = (score % 100) + "%";
-                if (dot > 0.35 && dist < 16) {
-                    suspicion += 2.2; document.getElementById('warning-vignette').style.opacity = "1";
-                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.set(0xff1111));
+                
+                // 先生がこちらを向いている（dot値が高い）時にスマホを見ていると、不審度が爆速で上昇
+                if (dot > 0.2 && dist < 18) {
+                    suspicion += 2.5; 
+                    document.getElementById('warning-vignette').style.opacity = "1";
+                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.setHex(0xff0000)); // 目を赤く光らせて威嚇
+                    sensei.head.rotation.x = -0.1; // プレイヤーを凝視
                 } else {
-                    suspicion = Math.max(0, suspicion - 0.4); document.getElementById('warning-vignette').style.opacity = "0";
-                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.set(0x000000));
+                    suspicion = Math.max(0, suspicion - 0.5); 
+                    document.getElementById('warning-vignette').style.opacity = "0";
+                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.setHex(0x000000));
                 }
             } else {
-                suspicion = Math.max(0, suspicion - 1.5); document.getElementById('warning-vignette').style.opacity = "0";
-                if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.set(0x000000));
+                suspicion = Math.max(0, suspicion - 1.2); 
+                document.getElementById('warning-vignette').style.opacity = "0";
+                if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.setHex(0x000000));
             }
+            
             document.getElementById('suspicion-bar').style.width = suspicion + "%";
             if (suspicion >= 100) gameOver();
         }
@@ -774,7 +800,7 @@
             const startScreen = document.getElementById('start-screen');
             startScreen.style.display = 'flex';
             document.getElementById('boot-title').innerText = "DISMISSED";
-            document.getElementById('boot-sub').innerHTML = `<span class='text-red-400 font-black text-3xl'>Score: ${score}</span><br><br>大網先生「...${userName}、そこまでして動画が見たいか？」`;
+            document.getElementById('boot-sub').innerHTML = `<span class='text-red-500 font-black text-3xl'>Score: ${score}</span><br><br>大網先生「...おい${userName}、ペンが完全に止まっているぞ。荷物をまとめて今すぐ出ていけ！」`;
             document.getElementById('start-btn').innerHTML = `<span class="material-icons-outlined">refresh</span>反省して再入室`; 
             isWatching = false;
         }
