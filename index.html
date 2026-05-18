@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>大網先生：自習室の帝王 - Realistic Edition</title>
     
-    <!-- iPadのホーム画面に追加した時にicon.pngを表示させる設定 -->
+    <!-- iPadのホーム画面アイコン設定 -->
     <link rel="apple-touch-icon" href="icon.png">
+    <!-- PWA化のためのマニフェスト設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -90,6 +94,22 @@
         </button>
     </div>
     <script>
+        // PWA用のService Workerと通知登録
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then((reg) => {
+                console.log('Service Worker Registered');
+                // 通知許可を要求
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        // Service Worker側にランダム通知のスケジュールを命令
+                        if (reg.active) {
+                            reg.active.postMessage({ action: 'scheduleNotifications' });
+                        }
+                    }
+                });
+            });
+        }
+
         let scene, camera, renderer, sensei, head, students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
         let clock = new THREE.Clock();
