@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>大網先生：自習室の帝王 - Premium PWA Edition</title>
     
     <link rel="apple-touch-icon" href="icon.png">
@@ -17,7 +17,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; background: #0b151a; touch-action: none; font-family: 'Roboto', 'Noto Sans JP', sans-serif; width: 100vw; height: 100vh; }
+        /* iPadのダブルタップズームや画面の予期せぬズレ・スクロールを徹底的に防ぐCSS */
+        html, body { 
+            margin: 0; 
+            padding: 0;
+            overflow: hidden; 
+            background: #0b151a; 
+            width: 100vw; 
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            /* タップ時のズームジェスチャーを無効化 */
+            touch-action: manipulation; 
+            -webkit-overflow-scrolling: auto;
+            -webkit-user-select: none;
+            user-select: none;
+            font-family: 'Roboto', 'Noto Sans JP', sans-serif;
+        }
+
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
         
         /* --- Material 3 Design System --- */
@@ -26,14 +44,14 @@
         .m3-card { background: #223742; border-radius: 16px; border: 1px solid #404e56; }
         
         /* Buttons */
-        .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
         .m3-btn-primary:hover { background: #b3e5ff; transform: scale(1.02); }
-        .m3-btn-tonal { background: #334a54; color: #bbe6ff; border-radius: 100px; font-weight: 500; transition: all 0.2s; padding: 12px 28px; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
+        .m3-btn-tonal { background: #334a54; color: #bbe6ff; border-radius: 100px; font-weight: 500; transition: all 0.2s; padding: 12px 28px; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
         .m3-btn-tonal:hover { background: #455f6b; }
-        .m3-btn-icon { background: #1a2c34; color: #bbe6ff; border-radius: 100px; transition: all 0.2s; border: 1px solid #404e56; z-index: 250; pointer-events: auto; }
+        .m3-btn-icon { background: #1a2c34; color: #bbe6ff; border-radius: 100px; transition: all 0.2s; border: 1px solid #404e56; z-index: 250; pointer-events: auto; touch-action: manipulation; }
         .m3-btn-icon:hover { background: #334a54; }
         
-        .m3-input { background: #0b151a; border: 1px solid #8a9296; color: #e1e3e5; border-radius: 8px; padding: 10px 14px; transition: all 0.2s; }
+        .m3-input { background: #0b151a; border: 1px solid #8a9296; color: #e1e3e5; border-radius: 8px; padding: 10px 14px; transition: all 0.2s; pointer-events: auto; }
         
         #youtube-device { position: absolute; bottom: 290px; left: 50%; transform: translateX(-50%); width: 460px; height: 260px; border-radius: 32px; overflow: hidden; border: 12px solid #132026; background: #fff; box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6); transition: transform 0.15s ease-out; }
         .active-view { transform: translateX(-50%) translateY(-20px) scale(1.03); }
@@ -45,7 +63,7 @@
             position: absolute; bottom: 40px; right: 40px; height: 64px; padding: 0 28px; border-radius: 32px;
             background: linear-gradient(45deg, #1a73e8, #9333ea, #ff7300, #1a73e8); background-size: 300% 300%;
             animation: geminiGradient 6s ease infinite; z-index: 90; pointer-events: auto; box-shadow: 0 8px 32px rgba(147, 51, 234, 0.4);
-            display: flex; align-items: center; gap: 12px; color: white; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 700; font-size: 1.05rem;
+            display: flex; align-items: center; gap: 12px; color: white; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 700; font-size: 1.05rem; touch-action: manipulation;
         }
         #gemini-ai-trigger.click-pop { transform: scale(0.85) translateY(10px); opacity: 0.6; }
         @keyframes geminiGradient {
@@ -251,32 +269,33 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🔑 【自分で入力用】コード内APIキー設定
-        // ==========================================
-        const GEMINI_API_KEY = "AIzaSyAorKSTtiQBjrzf556ZaiW_7bmqKHJKGmo";
+        const GEMINI_API_KEY = "ここにGeminiのAPIキーを入力してください";
 
-        // --- ニックネーム取得用ヘルパー ---
         function getUserName() {
             const savedName = localStorage.getItem('userNickname');
             return savedName && savedName.trim() !== "" ? savedName.trim() : "お前";
         }
 
-        // --- 🤖 プッシュ通知の確実な動作用 Service Worker インライン登録システム ---
+        // --- 📡 【超重要】本物の分離型 sw.js を登録するシステム ---
         if ('serviceWorker' in navigator) {
-            const swBlob = new Blob([`
-                self.addEventListener('notificationclick', function(event) {
-                    event.notification.close();
-                    event.waitUntil(clients.openWindow(event.notification.data || '/'));
-                });
-            `], { type: 'application/javascript' });
-            const swUrl = URL.createObjectURL(swBlob);
-            navigator.serviceWorker.register(swUrl).then(reg => {
-                console.log("Service Worker Successfully Injected for Notifications.");
-            }).catch(err => console.log("SW Register Fail:", err));
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log("分離型 Service Worker 登録成功！", reg))
+                .catch(err => console.error("SW 登録失敗。ファイル名を確認してね: ", err));
+            });
         }
 
-        // --- 起動アニメーション演出システム ---
+        // iPadでのダブルタップによる誤動作・ズレをJS側でも完全防止
+        let lastTouchEnd = 0;
+        document.documentElement.addEventListener('touchend', (event) => {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault(); // ダブルタップズームの挙動を完全にシャットアウト
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // 起動演出ログ
         const logLines = [
             "CRITICAL: SECURITY BREACH DETECTED...",
             "INITIALIZING OAMI MONITORING CORE V3...",
@@ -327,7 +346,7 @@
             setTimeout(printLine, 300);
         }
 
-        // --- 🕒 独立型ポモドーロタイマーロジック ---
+        // ポモドーロタイマー
         let pomoMinutesStudy = 25;
         let pomoMinutesBreak = 5;
         let pomoSecondsLeft = pomoMinutesStudy * 60;
@@ -393,9 +412,9 @@
             updatePomoClockUI();
         };
 
-        // --- 🔔 通知テストシステム＆状況判定通知 ---
+        // 🔔 プッシュ通知コアシステム（sw.js 経由で確実に起こす）
         function triggerPushNotification(title, body) {
-            if (Notification.permission === 'granted') {
+            if (Notification.permission === 'granted' && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.ready.then(registration => {
                     registration.showNotification(title, {
                         body: body,
@@ -403,22 +422,22 @@
                         vibrate: [300, 150, 300],
                         data: window.location.href
                     });
-                }).catch(err => {
-                    // フォールバック（Service Worker がまだ準備中の場合）
-                    new Notification(title, { body: body });
                 });
+            } else if (Notification.permission === 'granted') {
+                // 初回読み込み用フォールバック
+                new Notification(title, { body: body });
             }
         }
 
         document.getElementById('test-notification-btn').onclick = () => {
             const userName = getUserName();
             triggerPushNotification(
-                '大網先生の常時監視テスト',
-                `「おい、${userName}！テスト通知が届いているということは、私の眼光から逃れる術はないと理解したな！？励めよ！」`
+                '🔥 大網先生の常時監視テスト',
+                `「おい、${userName}！通知テストが通ったな！これで言い訳は一切通用せんぞ！」`
             );
         };
 
-        // --- ⏳ アプリ放置時間（バックグラウンドサボり）連動・激怒段階システム ---
+        // ⏳ アプリ放置時間（サボり）連動システム
         let offlineAngerCount = parseInt(localStorage.getItem('offlineAnger')) || 0;
         
         function updateAngerBadge(count) {
@@ -437,34 +456,22 @@
                 const elapsedMs = Date.now() - parseInt(lastTime);
                 const elapsedSec = Math.floor(elapsedMs / 1000);
                 
-                // 15秒サボるごとに怒りバッジ加算
                 const addedAnger = Math.floor(elapsedSec / 15);
                 if (addedAnger > 0) { 
                     offlineAngerCount += addedAnger; 
                     updateAngerBadge(offlineAngerCount); 
                 }
 
-                // 経過時間（サボり度）に応じて大網先生のセリフが変化
-                if (elapsedSec >= 120) { // 2分以上放置（破門級）
-                    triggerPushNotification(
-                        '🚨 大網先生の堪忍袋の緒',
-                        `「${userName}！！！お前はどれだけ自習室を空ければ気が済むんだ！？戻ってこないなら叩き出すぞ！！」`
-                    );
-                    alert(`大網先生「お前が画面を離れてから【${elapsedSec}秒】も経過しているぞ、${userName}！！アイコンの怒りバッジを見ろ！次はないと思え！！」`);
-                } else if (elapsedSec >= 45) { // 45秒以上放置（激怒級）
-                    triggerPushNotification(
-                        '⚡ 大網先生の咆哮',
-                        `「おい、${userName}！自習室に戻れ！他人のサボりはお前のサボり、お前のサボりは許さん！」`
-                    );
-                    alert(`大網先生「ほう、ずいぶんと長い間スマホを手放していたようだな、${userName}。サボり魔のバッジが【${offlineAngerCount}】まで跳ね上がっているぞ！」`);
-                } else if (elapsedSec >= 15) { // 15秒以上放置（警告級）
-                    triggerPushNotification(
-                        '📢 大網先生の視線',
-                        `「${userName}、席を外してどこへ行っていた？集中力が散漫になっている証拠だぞ。」`
-                    );
+                if (elapsedSec >= 120) { // 2分以上（破門級）
+                    triggerPushNotification('🚨 大網先生の堪忍袋の緒', `「${userName}！！！自習室を何分空けている！？戻ってこないなら叩き出すぞ！！」`);
+                    alert(`大網先生「お前が画面を離れてから【${elapsedSec}秒】も経過しているぞ、${userName}！！次はないと思え！！」`);
+                } else if (elapsedSec >= 45) { // 45秒以上（激怒級）
+                    triggerPushNotification('⚡ 大網先生の咆哮', `「おい、${userName}！今すぐ席に戻れ！他人のサボりはお前のサボり、お前のサボりは許さん！」`);
+                    alert(`大網先生「ずいぶんと長い間スマホを手放していたようだな、${userName}。サボり魔のバッジが【${offlineAngerCount}】まで跳ね上がっているぞ！」`);
+                } else if (elapsedSec >= 15) { // 15秒以上（警告級）
+                    triggerPushNotification('📢 大網先生の視線', `「${userName}、席を外してどこへ行っていた？集中力が散漫になっている証拠だぞ。」`);
                 }
             }
-            // 帰還したらバッジをリセット
             offlineAngerCount = 0; 
             updateAngerBadge(0);
         });
@@ -473,7 +480,7 @@
             localStorage.setItem('lastActiveTime', Date.now().toString());
         });
 
-        // Camo Screens
+        // カモフラ画面
         const urlParams = new URLSearchParams(window.location.search);
         let initialCamo = urlParams.get('shortcut') || 'math';
         const camoTemplates = {
@@ -489,7 +496,7 @@
             if (radio) radio.checked = true;
         }
 
-        // --- 🤖 Ami AI サイドバー関連 ---
+        // Ami AI 連携
         let selectedBase64Image = null;
         const aiTrigger = document.getElementById('gemini-ai-trigger');
         const aiDock = document.getElementById('ai-dock');
@@ -533,7 +540,7 @@
             const userName = getUserName();
             
             if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("ここにGeminiの")) { 
-                alert('Ami AIの稼働にはAPIキーの設定が必要です。HTMLコードの最上部にある「GEMINI_API_KEY」に有効なキーを入力してください。'); 
+                alert('Ami AIの稼働にはAPIキーの設定が必要です。'); 
                 return; 
             }
             if (!textInput && !selectedBase64Image) return;
@@ -547,13 +554,8 @@
             systemMsgHtml.innerText = "大網先生が答案の不備を精査中..."; chatLog.appendChild(systemMsgHtml);
             chatLog.scrollTop = chatLog.scrollHeight;
 
-            const promptText = `あなたは非常に厳格で威圧的な、絶対に生徒のサボりを許さない伝説の塾講師「大網先生」です。ユーザー（塾生）からの質問・問題に対して、徹底的に正しく解説をしてください。その際、必ず以下のディレクションを守ること。
-・ユーザーの名前（ニックネーム）は「${userName}」です。二人称として必ず「${userName}」を呼ぶか、たまに「貴様」を織り交ぜてください。
-・「こんな問題もわからないのか、${userName}」「甘えるな」「自習室の帝王を舐めるな」といった説教を必ず織り交ぜる。
-・解説自体は数学、国語、英語などどんな内容であっても、論理的かつ完璧に行うこと。
-ユーザー（${userName}）の質問: ${textInput}`;
-
-            let parts = [{ text: promptText }];
+            const promptText = `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（${userName}）からの質問に徹底的に解説しつつ、お説教を織り交ぜてください。`;
+            let parts = [{ text: promptText + `\nユーザーの質問: ${textInput}` }];
             if (selectedBase64Image) parts.push({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
 
             try {
@@ -563,42 +565,30 @@
                 });
                 const data = await response.json();
                 const replyText = data.candidates[0].content.parts[0].text;
-                
                 systemMsgHtml.classList.remove('animate-pulse'); 
                 systemMsgHtml.className = "text-red-300 font-bold";
                 typeWriterEffect(systemMsgHtml, `大網先生「${replyText}`);
             } catch (err) {
-                systemMsgHtml.className = "text-amber-400"; systemMsgHtml.innerText = "大網先生「通信エラーだ。お前のコード内キー設定に不備があるようだな！」";
+                systemMsgHtml.className = "text-amber-400"; systemMsgHtml.innerText = "大網先生「通信エラーだ！」";
             }
             selectedBase64Image = null; document.getElementById('file-preview-name').classList.add('hidden');
         };
 
-        // 設定ダイアログでの保存・同期
+        // 設定ダイアログ保存
         document.getElementById('save-settings-btn').onclick = () => {
             const inputName = document.getElementById('user-nickname-input').value.trim();
             localStorage.setItem('userNickname', inputName);
-            
             pomoMinutesStudy = parseInt(document.getElementById('timer-study-input').value) || 25;
             pomoMinutesBreak = parseInt(document.getElementById('timer-break-input').value) || 5;
-            pomoTimerState = 'STUDY';
             pomoSecondsLeft = pomoMinutesStudy * 60;
-            pomoBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME`;
-            pomoBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8";
             updatePomoClockUI();
-            
-            const currentName = getUserName();
-            document.getElementById('ai-greeting-text').innerText = `大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か、${currentName}？」`;
-
-            alert(`大網先生「環境を再構築したぞ、${currentName}。一秒も無駄にするな」`);
+            alert(`大網先生「環境を再構築したぞ、${getUserName()}。一秒も無駄にするな」`);
             document.getElementById('settings-dialog').classList.add('hidden');
         };
 
         function loadSavedNickname() {
             const savedName = localStorage.getItem('userNickname');
-            if (savedName) {
-                document.getElementById('user-nickname-input').value = savedName;
-                document.getElementById('ai-greeting-text').innerText = `大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か、${savedName}？」`;
-            }
+            if (savedName) document.getElementById('user-nickname-input').value = savedName;
         }
 
         document.getElementById('settings-toggle-btn').onclick = (e) => { e.stopPropagation(); document.getElementById('settings-dialog').classList.remove('hidden'); };
@@ -607,7 +597,7 @@
             radio.addEventListener('change', (e) => setCamoScreen(e.target.value));
         });
 
-        // --- 🎓 Three.js 3Dグラフィックス空間 ---
+        // --- 🎓 Three.js 3Dグラフィックス空間（大網先生完全復活版） ---
         let scene, camera, renderer, sensei;
         let students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
@@ -622,7 +612,7 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // 【大網先生復活のバグ修正版】
+        // 大網先生＆生徒の3Dメッシュを完全にエラー無く組み立てる関数
         function createDetailedPerson(isSensei = false) {
             const group = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.6 });
@@ -630,30 +620,35 @@
                 new THREE.MeshStandardMaterial({ color: 0x1e2d3d, roughness: 0.6 }) : 
                 new THREE.MeshStandardMaterial({ map: createPatternTexture('checked', `hsl(${Math.random()*360}, 60%, 45%)`, '#111'), roughness: 0.8 });
 
+            // トルソー（体）
             const torso = new THREE.Group();
             const chest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.35), clothMat); chest.position.y = 1.25;
             const waist = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.3), new THREE.MeshStandardMaterial({color:0x222222})); waist.position.y = 0.9;
-            torso.add(chest, waist); group.add(torso);
+            torso.add(chest, waist);
 
             if (isSensei) {
                 const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.3, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff })); shirt.position.set(0, 1.35, 0.16);
                 const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.28, 0.02), new THREE.MeshStandardMaterial({ color: 0xcc1111 })); tie.position.set(0, 1.25, 0.17);
                 torso.add(shirt, tie);
             }
+            group.add(torso);
 
+            // 腕の生成
             group.armL = new THREE.Group(); group.armR = new THREE.Group();
             const upperArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.45, 0.18), clothMat); upperArm.position.y = -0.22;
             group.armL.add(upperArm.clone()); group.armL.position.set(-0.4, 1.4, 0);
             group.armR.add(upperArm.clone()); group.armR.position.set(0.4, 1.4, 0);
             group.add(group.armL, group.armR);
 
-            const createLeg = (side) => {
-                const leg = new THREE.Group();
-                const pant = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.6, 0.22), new THREE.MeshStandardMaterial({ color: 0x151515 })); pant.position.y = -0.3;
-                leg.add(pant); leg.position.set(side * 0.16, 0.75, 0); return leg;
-            };
-            group.legL = createLeg(-1); group.legR = createLeg(1); group.add(group.legL, group.legR);
+            // 足の生成
+            const pantL = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.6, 0.22), new THREE.MeshStandardMaterial({ color: 0x151515 })); pantL.position.y = -0.3;
+            group.legL = new THREE.Group(); group.legL.add(pantL); group.legL.position.set(-0.16, 0.75, 0);
+            
+            const pantR = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.6, 0.22), new THREE.MeshStandardMaterial({ color: 0x151515 })); pantR.position.y = -0.3;
+            group.legR = new THREE.Group(); group.legR.add(pantR); group.legR.position.set(0.16, 0.75, 0);
+            group.add(group.legL, group.legR);
 
+            // 頭部の生成
             const headGroup = new THREE.Group();
             const skull = new THREE.Mesh(new THREE.SphereGeometry(0.24, 32, 16), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
             
@@ -663,12 +658,13 @@
                 const eL = new THREE.Mesh(eyeGeo, eyeMat.clone()); eL.position.set(-0.09, 0.05, 0.2);
                 const eR = new THREE.Mesh(eyeGeo, eyeMat.clone()); eR.position.set(0.09, 0.05, 0.2);
                 headGroup.add(eL, eR); 
-                group.eyes = [eL, eR]; // 先生オブジェクトのプロパティとして配列を設定
+                group.eyes = [eL, eR]; // 怒り時に赤く光らせる配列を格納
             } else {
                 const hairGeo = new THREE.SphereGeometry(0.25, 16, 16, 0, Math.PI * 2, 0, Math.PI / 1.7);
                 const hair = new THREE.Mesh(hairGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 })); hair.scale.set(1.02, 1.05, 1.05); headGroup.add(hair);
             }
             headGroup.position.y = 1.65; group.add(headGroup); group.head = headGroup;
+
             return group;
         }
 
@@ -677,7 +673,7 @@
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 2.5, 7.5); camera.lookAt(0, 1.2, 0);
             
             renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true; document.body.appendChild(renderer.domElement);
+            document.body.appendChild(renderer.domElement);
             
             scene.add(new THREE.AmbientLight(0xffffff, 0.5));
             const mainLight = new THREE.DirectionalLight(0xfffaed, 0.7); mainLight.position.set(10, 25, 10); scene.add(mainLight);
@@ -708,8 +704,10 @@
                 }
             }
 
-            // 大網先生インスタンス生成
-            sensei = createDetailedPerson(true); sensei.position.set(0, 0, -15); scene.add(sensei);
+            // ⭐ 大網先生を教室の最前線（教壇）に完全配置！
+            sensei = createDetailedPerson(true); 
+            sensei.position.set(0, 0, -16); 
+            scene.add(sensei);
             
             setCamoScreen(initialCamo); loadSavedNickname(); updatePomoClockUI();
 
