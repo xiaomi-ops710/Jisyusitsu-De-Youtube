@@ -3,56 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>大網先生：自習室の帝王 - Realistic Edition</title>
+    <title>大網先生：自習室の帝王 - Super Realistic</title>
     
-    <!-- iPadのホーム画面アイコン設定 -->
     <link rel="apple-touch-icon" href="icon.png">
-    <!-- PWA化のためのマニフェスト設定 -->
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
+    <!-- Google Material Icons & Fonts -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Helvetica Neue', Arial, sans-serif; }
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
-        .hud-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 10px 20px; color: white; }
-        #youtube-device { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 380px; height: 220px; border-radius: 12px; overflow: hidden; border: 8px solid #0f172a; background: #fff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transition: transform 0.15s ease-out; }
+        .hud-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 10px 20px; color: white; }
+        #youtube-device { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 380px; height: 220px; border-radius: 16px; overflow: hidden; border: 8px solid #0f172a; background: #fff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transition: transform 0.15s ease-out; }
         .active-view { transform: translateX(-50%) translateY(-15px) scale(1.02); }
         #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 50%, rgba(185, 28, 28, 0.4) 100%); opacity: 0; transition: opacity 0.2s; z-index: 40; }
         #start-screen { position: absolute; inset: 0; background: #0f172a; display: flex; flex-direction: column; items-center justify-content: center; z-index: 100; text-align: center; color: white; }
+        
+        /* Material 3 スタイル */
+        .m3-dialog { background: #f7f2fa; color: #1d1b20; border-radius: 28px; box-shadow: 0px 1px 3px rgba(0,0,0,0.3), 0px 4px 8px 3px rgba(0,0,0,0.15); }
+        .m3-btn-tonal { background: #e8def8; color: #1d192b; border-radius: 100px; transition: all 0.2s; }
+        .m3-btn-tonal:hover { background: #e1d5f5; }
+        .m3-card { background: #fef7ff; border-radius: 12px; border: 1px solid #79747e; }
+        .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
     </style>
 </head>
 <body>
     <div id="ui-layer">
+        <!-- HUD -->
         <div class="absolute top-6 left-6 hud-panel">
             <div class="text-[10px] text-red-400 font-bold uppercase tracking-widest">Happiness</div>
             <div id="score-text" class="text-3xl font-black italic">0000</div>
         </div>
-        <div class="absolute top-6 right-6 hud-panel w-40">
+        <div class="absolute top-6 right-16 hud-panel w-40">
             <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1 text-right">Suspicion</div>
             <div class="h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
                 <div id="suspicion-bar" class="h-full bg-red-500 w-0 transition-all duration-75"></div>
             </div>
         </div>
+
+        <!-- Material 3 設定ボタン -->
+        <button id="settings-toggle-btn" class="absolute top-6 right-4 w-10 h-10 bg-slate-900/80 backdrop-blur text-white rounded-full flex items-center justify-center pointer-events-auto shadow-lg hover:bg-slate-800 transition-all">
+            <span class="material-icons-outlined">settings</span>
+        </button>
+
+        <!-- スマホ・デバイス画面 -->
         <div id="youtube-device">
-            <!-- STUDY MODE -->
-            <div id="screen-study" class="w-full h-full p-4 flex flex-col bg-white">
-                <div class="flex justify-between items-center border-b pb-2 mb-3">
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">Advanced Mathematics</span>
-                    <span class="text-[10px] text-slate-300 italic">Page 241</span>
-                </div>
-                <div class="space-y-2">
-                    <div class="h-2 w-full bg-slate-100 rounded"></div>
-                    <div class="h-2 w-11/12 bg-slate-100 rounded"></div>
-                    <div class="my-4 p-4 bg-slate-50 border border-slate-100 rounded text-center">
-                        <span class="text-lg font-serif text-slate-400 italic">f(x) = ∫[a,b] sin(x²) dx</span>
-                    </div>
-                    <div class="h-2 w-full bg-slate-100 rounded"></div>
-                    <div class="h-2 w-3/4 bg-slate-100 rounded"></div>
-                </div>
+            <!-- STUDY MODE (動的に切り替わるカモフラージュ) -->
+            <div id="screen-study" class="w-full h-full p-4 flex flex-col bg-white overflow-hidden text-slate-800">
+                <!-- ここはJavaScriptで書き換わります -->
             </div>
+
             <!-- YOUTUBE MODE -->
             <div id="screen-youtube" class="hidden w-full h-full bg-black flex flex-col">
                 <div class="p-2 flex items-center gap-1 bg-zinc-900">
@@ -78,6 +84,69 @@
             </div>
         </div>
     </div>
+
+    <!-- M3 設定ダイアログ画面 -->
+    <div id="settings-dialog" class="hidden absolute inset-0 bg-black/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="m3-dialog w-full max-w-md p-6 flex flex-col max-h-[90vh]">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-medium text-[#1d1b20] flex items-center gap-2">
+                    <span class="material-icons-outlined text-[#6750a4]">tune</span> アプリ設定
+                </h2>
+                <button id="settings-close-btn" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200">
+                    <span class="material-icons-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="flex-grow overflow-y-auto space-y-5 pr-1">
+                <!-- 1. 通知テスト -->
+                <div class="p-4 m3-card bg-white">
+                    <h3 class="text-sm font-medium text-[#6750a4] mb-2 flex items-center gap-1"><span class="material-icons-outlined text-sm">notifications_active</span> 通知テスト機能</h3>
+                    <p class="text-xs text-slate-500 mb-3">ボタンを押すと、バックグラウンドから大網先生の通知が即座にテスト送信されます。</p>
+                    <button id="test-notif-btn" class="w-full py-2.5 m3-btn-tonal text-sm font-medium flex items-center justify-center gap-2">
+                        <span class="material-icons-outlined text-sm">send</span> 大網先生からの通知をテスト
+                    </button>
+                </div>
+
+                <!-- 2. カモフラージュ選択 -->
+                <div class="p-4 m3-card bg-white">
+                    <h3 class="text-sm font-medium text-[#6750a4] mb-2 flex items-center gap-1"><span class="material-icons-outlined text-sm">visibility</span> 自習画面（カモフラージュ）選択</h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
+                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">functions</span> 数学の教科書</span>
+                            <input type="radio" name="camo-select" value="math" checked class="w-4 h-4 accent-[#6750a4]">
+                        </label>
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
+                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">smart_display</span> スタサプ風（オンライン講義）</span>
+                            <input type="radio" name="camo-select" value="studysapuri" class="w-4 h-4 accent-[#6750a4]">
+                        </label>
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
+                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">translate</span> 英語長文読解</span>
+                            <input type="radio" name="camo-select" value="english" class="w-4 h-4 accent-[#6750a4]">
+                        </label>
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
+                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">menu_book</span> 国語（羅生門・縦書き）</span>
+                            <input type="radio" name="camo-select" value="japanese" class="w-4 h-4 accent-[#6750a4]">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. アイコン設定情報 -->
+                <div class="p-4 m3-card bg-white">
+                    <h3 class="text-sm font-medium text-[#6750a4] mb-1 flex items-center gap-1"><span class="material-icons-outlined text-sm">collections</span> アイコンの変更について</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">
+                        PWAの仕様上、アイコンはリポジトリの <code class="bg-slate-100 px-1 rounded">icon.png</code> と連動します。アイコン画像を変更したい場合は、GitHub上の画像を上書きしてください。次回起動時に反映されます。
+                    </p>
+                </div>
+            </div>
+
+            <!-- GitHub クレジット -->
+            <div class="mt-4 pt-3 border-t border-slate-200 text-center text-[11px] text-slate-400 font-medium tracking-wider uppercase flex items-center justify-center gap-1">
+                <span class="material-icons-outlined text-[14px]">code</span> Powered by GitHub
+            </div>
+        </div>
+    </div>
+
+    <!-- 警告演出・スタート画面 -->
     <div id="warning-vignette"></div>
     <div id="start-screen">
         <div class="mb-6 relative group">
@@ -90,26 +159,121 @@
             先生がこちらを向いた時、あなたは「生徒」でいられるか。
         </p>
         
-        <!-- iOS対策：通知権限を明示的に呼び出すための個別ボタン -->
         <div class="flex flex-col items-center gap-3 z-50">
-            <button id="auth-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-red-700 active:scale-95 transition-all pointer-events-auto">
-                🚨 大網先生の監視を受け入れる（通知を許可）
+            <button id="auth-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-red-700 active:scale-95 transition-all pointer-events-auto flex items-center gap-1">
+                <span class="material-icons-outlined text-base">gpp_maybe</span> 大網先生の監視を受け入れる（通知を許可）
             </button>
             <button id="start-btn" class="bg-white text-slate-900 px-12 py-4 rounded-full text-xl font-black hover:bg-slate-200 transition-all shadow-xl active:scale-95 pointer-events-auto opacity-50 cursor-not-allowed" disabled>
-                入室を開始（まず通知を許可してください）
+                入室を開始
             </button>
         </div>
     </div>
 
     <script>
-        // Service Workerの事前登録
+        // --- カモフラージュ画面のデータテンプレート ---
+        const camoTemplates = {
+            math: `
+                <div class="flex justify-between items-center border-b pb-1 mb-2">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-0.5"><span class="material-icons-outlined text-[10px]">functions</span> Advanced Math</span>
+                    <span class="text-[9px] text-slate-300 italic">Page 241</span>
+                </div>
+                <div class="space-y-1.5 text-slate-600">
+                    <div class="h-1.5 w-full bg-slate-100 rounded"></div>
+                    <div class="h-1.5 w-11/12 bg-slate-100 rounded"></div>
+                    <div class="my-2 p-3 bg-slate-50 border border-slate-100 rounded text-center">
+                        <span class="text-sm font-serif text-slate-500 italic">f(x) = ∫[a,b] sin(x²) dx</span>
+                    </div>
+                    <div class="h-1.5 w-full bg-slate-100 rounded"></div>
+                    <div class="h-1.5 w-3/4 bg-slate-100 rounded"></div>
+                </div>`,
+            studysapuri: `
+                <div class="w-full h-full flex flex-col bg-slate-950 text-white p-0 relative">
+                    <div class="bg-slate-900 px-3 py-1 flex items-center gap-1.5 border-b border-slate-800">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span class="text-[9px] font-bold text-slate-300 tracking-wide">第4講 英文法の極意 (関係代名詞)</span>
+                    </div>
+                    <div class="flex-grow flex bg-slate-900 relative items-center justify-center">
+                        <div class="absolute left-4 top-4 bg-slate-800 border border-slate-700 w-24 h-16 rounded flex flex-col p-1">
+                            <div class="w-full h-2 bg-cyan-500 rounded-sm mb-1"></div>
+                            <div class="space-y-0.5">
+                                <div class="h-1 w-full bg-slate-600 rounded"></div>
+                                <div class="h-1 w-4/5 bg-slate-600 rounded"></div>
+                            </div>
+                        </div>
+                        <div class="text-center font-bold text-cyan-400 text-xs tracking-wider animate-pulse">
+                            [ 講師：大網先生 (特別代講) ]<br>
+                            <span class="text-[9px] text-white/70 font-normal">01:24 / 45:00</span>
+                        </div>
+                    </div>
+                </div>`,
+            english: `
+                <div class="flex justify-between items-center border-b pb-1 mb-2">
+                    <span class="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-0.5"><span class="material-icons-outlined text-[10px]">translate</span> English Reading</span>
+                    <span class="text-[9px] text-slate-300 italic">Lesson 7</span>
+                </div>
+                <div class="space-y-2 text-[10px] text-slate-700 font-serif leading-relaxed">
+                    <p class="font-bold text-slate-900">The Impact of Artificial Intelligence on Future Education.</p>
+                    <p>Many scientists believe that technology will fully optimize how humans acquire knowledge. However, the spiritual presence of a strict instructor remains irreplaceable...</p>
+                    <div class="h-1.5 w-2/3 bg-slate-100 rounded"></div>
+                </div>`,
+            japanese: `
+                <div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-2 font-serif">
+                    <div class="text-[8px] text-slate-400 border-b border-orange-200/60 pb-0.5 mb-1 flex justify-between">
+                        <span>国語一（総合）</span><span>芥川龍之介「羅生門」</span>
+                    </div>
+                    <div class="flex flex-row-reverse justify-start gap-3 h-full overflow-hidden text-right pr-2">
+                        <p class="vertical-text text-xs leading-loose font-medium">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。</p>
+                        <p class="vertical-text text-[10px] text-slate-500 leading-loose">広い門の下には、この男のほかに誰もいない。ただ、所々丹塗りの剥げた、大きな円柱に、</p>
+                    </div>
+                </div>`
+        };
+
+        let currentCamo = 'math';
+        function setCamoScreen(type) {
+            currentCamo = type;
+            const container = document.getElementById('screen-study');
+            if(container) container.innerHTML = camoTemplates[type];
+        }
+
+        // --- PWA Service Worker 登録 & 設定画面UIイベント ---
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').then((reg) => {
                 console.log('Service Worker Registered');
-            }).catch(err => console.log('SW Register Error:', err));
+            });
         }
 
-        // 通知許可ボタンのクリックイベント（ユーザー操作の直結）
+        // 設定画面の開閉制御
+        document.getElementById('settings-toggle-btn').onclick = () => {
+            document.getElementById('settings-dialog').classList.remove('hidden');
+        };
+        document.getElementById('settings-close-btn').onclick = () => {
+            document.getElementById('settings-dialog').classList.add('hidden');
+        };
+
+        // カモフラージュ切り替えラジオボタンイベント
+        document.querySelectorAll('input[name="camo-select"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                setCamoScreen(e.target.value);
+            });
+        });
+
+        // テスト通知送信ボタン
+        document.getElementById('test-notif-btn').onclick = () => {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(reg => {
+                    if (reg.active) {
+                        // Service Workerに対して「今すぐ通知を出せ」とシグナルを送信
+                        reg.active.postMessage({ action: 'triggerImmediateNotification' });
+                    } else {
+                        alert("アプリがまだ完全に準備できていません。一度ゲームを開始してみてください。");
+                    }
+                });
+            } else {
+                alert("Service Workerに対応していません。");
+            }
+        };
+
+        // 通知権限の要求処理
         document.getElementById('auth-btn').onclick = function() {
             if (!('Notification' in window)) {
                 alert('このブラウザは通知に対応していません。iPadのホーム画面から起動してください。');
@@ -120,16 +284,13 @@
                 if (permission === 'granted') {
                     alert('大網先生の監視が有効になりました。自習室へ入れます。');
                     
-                    // 「入室を開始」ボタンをアクティブにする
                     const startBtn = document.getElementById('start-btn');
                     startBtn.disabled = false;
                     startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
                     startBtn.classList.add('hover:bg-red-600', 'hover:text-white');
                     
-                    // 許可ボタンを非表示にする
                     this.style.display = 'none';
 
-                    // Service Workerに通知スケジュール命令を送る
                     if ('serviceWorker' in navigator) {
                         navigator.serviceWorker.ready.then(reg => {
                             if (reg.active) {
@@ -137,12 +298,13 @@
                             }
                         });
                     }
-                } else if (permission === 'denied') {
-                    alert('通知が拒否されました。iPadの設定アプリから「大網サバイバル」の通知を許可してください。');
+                } else {
+                    alert('通知が拒否されました。設定アプリから通知を許可してください。');
                 }
             });
         };
 
+        // --- 以下、Three.js ゲームコアロジック ---
         let scene, camera, renderer, sensei, head, students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
         let clock = new THREE.Clock();
@@ -279,17 +441,22 @@
             sensei.position.set(0, 0, -10);
             scene.add(sensei);
 
+            // 初期カモフラージュ画面を設定
+            setCamoScreen('math');
+
             const startAction = (e) => {
-                if (!gameActive) return;
+                if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog')) return;
                 isWatching = true;
                 document.getElementById('screen-study').classList.add('hidden');
                 document.getElementById('screen-youtube').classList.remove('hidden');
                 document.getElementById('youtube-device').classList.add('active-view');
             };
             const stopAction = (e) => {
+                if (e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog')) return;
                 isWatching = false;
                 document.getElementById('screen-study').classList.remove('hidden');
                 document.getElementById('screen-youtube').classList.add('hidden');
+                document.getElementById('youtube-device').classList.remove('remove-view');
                 document.getElementById('youtube-device').classList.remove('active-view');
             };
             window.addEventListener('mousedown', startAction);
