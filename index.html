@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>大網先生：自習室の帝王 - Super Realistic</title>
+    <title>大網先生：自習室の帝王 - Material 3 Edition</title>
     
     <link rel="apple-touch-icon" href="icon.png">
     <link rel="manifest" href="manifest.json">
@@ -17,564 +17,413 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
+        body { margin: 0; overflow: hidden; background: #141218; touch-action: none; font-family: 'Roboto', sans-serif; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
-        .hud-panel { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 10px 20px; color: white; }
-        #youtube-device { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 380px; height: 220px; border-radius: 16px; overflow: hidden; border: 8px solid #0f172a; background: #fff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); transition: transform 0.15s ease-out; }
-        .active-view { transform: translateX(-50%) translateY(-15px) scale(1.02); }
-        #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 50%, rgba(185, 28, 28, 0.4) 100%); opacity: 0; transition: opacity 0.2s; z-index: 40; }
-        #start-screen { position: absolute; inset: 0; background: #0f172a; display: flex; flex-direction: column; items-center justify-content: center; z-index: 100; text-align: center; color: white; }
         
-        /* Material 3 スタイル */
-        .m3-dialog { background: #f7f2fa; color: #1d1b20; border-radius: 28px; box-shadow: 0px 1px 3px rgba(0,0,0,0.3), 0px 4px 8px 3px rgba(0,0,0,0.15); }
-        .m3-btn-tonal { background: #e8def8; color: #1d192b; border-radius: 100px; transition: all 0.2s; }
-        .m3-btn-tonal:hover { background: #e1d5f5; }
-        .m3-card { background: #fef7ff; border-radius: 12px; border: 1px solid #79747e; }
+        /* --- Material 3 全体デザインシステム --- */
+        /* コンテナ、パネル、ダイアログ */
+        .m3-surface { background: #211f26; color: #e6e1e5; border-radius: 28px; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .m3-hud { background: rgba(29, 27, 32, 0.85); backdrop-filter: blur(12px); border-radius: 16px; color: #e6e1e5; padding: 12px 24px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .m3-dialog { background: #2b2930; color: #e6e1e5; border-radius: 28px; box-shadow: 0px 1px 3px rgba(0,0,0,0.3), 0px 4px 8px 3px rgba(0,0,0,0.15); }
+        .m3-card { background: #36343b; border-radius: 12px; border: 1px solid #49454f; }
+        
+        /* ボタン群 */
+        .m3-btn-primary { background: #d0bcff; color: #381e72; border-radius: 100px; font-weight: 500; transition: all 0.2s; }
+        .m3-btn-primary:hover { background: #e8def8; }
+        .m3-btn-tonal { background: #4a4458; color: #e8def8; border-radius: 100px; font-weight: 500; transition: all 0.2s; }
+        .m3-btn-tonal:hover { background: #625b71; }
+        .m3-btn-icon { background: #2b2930; color: #e8def8; border-radius: 100px; transition: all 0.2s; }
+        .m3-btn-icon:hover { background: #4a4458; }
+        
+        /* テキスト入力 */
+        .m3-input { background: #1d1b20; border: 1px solid #938f99; color: #e6e1e5; border-radius: 4px; padding: 8px 12px; transition: all 0.2s; }
+        .m3-input:focus { border-color: #d0bcff; outline: none; }
+        
+        /* ゲーム特有 */
+        #youtube-device { position: absolute; bottom: 270px; left: 50%; transform: translateX(-50%); width: 380px; height: 220px; border-radius: 24px; overflow: hidden; border: 10px solid #211f26; background: #fff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7); transition: transform 0.15s ease-out; }
+        .active-view { transform: translateX(-50%) translateY(-15px) scale(1.02); }
+        #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 40%, rgba(225, 179, 183, 0.3) 100%); opacity: 0; transition: opacity 0.2s; z-index: 40; }
+        #start-screen { position: absolute; inset: 0; background: #141218; display: flex; flex-direction: column; items-center justify-content: center; z-index: 100; text-align: center; color: #e6e1e5; }
+        
+        /* Ami AI ボトムドック (M3 Bottom Sheet) */
+        #ai-dock { position: absolute; bottom: 0; left: 0; right: 0; height: 250px; background: #2b2930; border-radius: 28px 28px 0 0; z-index: 60; border-top: 1px solid #49454f; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 -8px 32px rgba(0,0,0,0.3); }
+        .ai-collapsed { transform: translateY(200px); }
         .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
     </style>
 </head>
 <body>
     <div id="ui-layer">
-        <!-- HUD -->
-        <div class="absolute top-6 left-6 hud-panel">
-            <div class="text-[10px] text-red-400 font-bold uppercase tracking-widest">Happiness</div>
-            <div id="score-text" class="text-3xl font-black italic">0000</div>
+        <!-- M3 HUD パネル -->
+        <div class="absolute top-6 left-6 m3-hud">
+            <div class="text-[10px] text-[#ccc4dc] font-medium uppercase tracking-widest">Happiness</div>
+            <div id="score-text" class="text-3xl font-black italic tracking-wider text-[#d0bcff]">0000</div>
         </div>
-        <div class="absolute top-6 right-16 hud-panel w-40">
-            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1 text-right">Suspicion</div>
-            <div class="h-1.5 w-full bg-slate-700 rounded-full overflow-hidden">
-                <div id="suspicion-bar" class="h-full bg-red-500 w-0 transition-all duration-75"></div>
+        <div class="absolute top-6 right-16 m3-hud w-44">
+            <div class="text-[10px] text-[#ccc4dc] font-medium uppercase tracking-widest mb-1.5 text-right">Suspicion</div>
+            <div class="h-2 w-full bg-[#4a4458] rounded-full overflow-hidden">
+                <div id="suspicion-bar" class="h-full bg-[#f2b8b5] w-0 transition-all duration-75"></div>
             </div>
         </div>
 
-        <!-- Material 3 設定ボタン -->
-        <button id="settings-toggle-btn" class="absolute top-6 right-4 w-10 h-10 bg-slate-900/80 backdrop-blur text-white rounded-full flex items-center justify-center pointer-events-auto shadow-lg hover:bg-slate-800 transition-all">
+        <!-- M3 設定アイコンボタン -->
+        <button id="settings-toggle-btn" class="absolute top-6 right-4 w-12 h-12 m3-btn-icon flex items-center justify-center pointer-events-auto shadow-md">
             <span class="material-icons-outlined">settings</span>
         </button>
 
         <!-- スマホ・デバイス画面 -->
         <div id="youtube-device">
-            <!-- STUDY MODE -->
-            <div id="screen-study" class="w-full h-full p-4 flex flex-col bg-white overflow-hidden text-slate-800">
-                <!-- JavaScriptで動的ロード -->
-            </div>
-
-            <!-- YOUTUBE MODE -->
+            <div id="screen-study" class="w-full h-full p-4 flex flex-col bg-[#fafafa] overflow-hidden text-slate-800"></div>
             <div id="screen-youtube" class="hidden w-full h-full bg-black flex flex-col">
                 <div class="p-2 flex items-center gap-1 bg-zinc-900">
                     <span class="text-red-600 font-black text-sm tracking-tighter">YouTube<span class="bg-red-600 text-white text-[8px] px-0.5 ml-0.5 rounded-sm">JP</span></span>
-                    <div class="ml-auto w-4 h-4 bg-zinc-700 rounded-full"></div>
                 </div>
                 <div class="flex-grow flex items-center justify-center relative bg-zinc-800 overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-tr from-red-600 via-purple-600 to-blue-600 opacity-40 animate-pulse"></div>
                     <div class="z-10 text-center">
-                        <div class="text-white font-black text-lg italic shadow-lg">AMAZING OAMI DANCE</div>
-                        <div class="text-[10px] text-white/60">3.4M views • 2 hours ago</div>
+                        <div class="text-white font-black text-sm italic">AMAZING OAMI DANCE</div>
                     </div>
                 </div>
-                <div class="p-2 bg-zinc-900">
-                    <div class="h-1 w-full bg-white/20 rounded-full mb-1 overflow-hidden">
-                        <div id="yt-progress" class="h-full bg-red-600" style="width: 35%"></div>
-                    </div>
-                    <div class="flex justify-between text-[8px] text-white/40 font-mono">
-                        <span>15:20 / 30:00</span>
-                        <span class="text-red-500">LIVE ●</span>
+                <div class="p-1 bg-zinc-900">
+                    <div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                        <div id="yt-progress" class="h-full bg-red-600" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- M3 設定ダイアログ画面 -->
-    <div id="settings-dialog" class="hidden absolute inset-0 bg-black/40 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-        <div class="m3-dialog w-full max-w-md p-6 flex flex-col max-h-[90vh]">
+    <!-- M3 Ami AI ボトムシート -->
+    <div id="ai-dock" class="ai-collapsed p-4 flex flex-col pointer-events-auto">
+        <div id="ai-drag-handle" class="w-full flex flex-col items-center justify-center cursor-pointer pb-2">
+            <div class="w-10 h-1 bg-[#938f99] rounded-full mb-2"></div>
+            <div class="text-xs font-medium text-[#e6e1e5] flex items-center gap-1.5">
+                <span class="material-icons-outlined text-base text-[#d0bcff]">psychology</span> Ami AI (大網先生)
+            </div>
+        </div>
+        
+        <!-- チャットログ -->
+        <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-3 p-3 bg-[#1d1b20] rounded-xl text-xs space-y-2 border border-[#49454f] text-[#e6e1e5] font-mono">
+            <div class="text-[#f2b8b5] font-medium">大網先生「おい、何か解かせたい問題、あるいは言い訳でもあるのか？」</div>
+        </div>
+
+        <!-- コントロールバー -->
+        <div class="flex items-center gap-2">
+            <label class="w-10 h-10 m3-btn-tonal rounded-full cursor-pointer flex items-center justify-center text-[#e8def8]" title="教科書・問題を添付">
+                <span class="material-icons-outlined text-xl">attach_file</span>
+                <input type="file" id="ai-file-input" accept="image/*" class="hidden">
+            </label>
+            <input type="text" id="ai-text-input" placeholder="問題を入力、または画像を添付しろ..." class="flex-grow m3-input rounded-full text-xs px-4 h-10">
+            <button id="ai-send-btn" class="w-10 h-10 m3-btn-primary rounded-full flex items-center justify-center">
+                <span class="material-icons-outlined text-lg">send</span>
+            </button>
+        </div>
+        <div id="file-preview-name" class="text-[10px] text-[#ccc4dc] px-12 mt-1 hidden italic"></div>
+    </div>
+
+    <!-- M3 設定ダイアログ -->
+    <div id="settings-dialog" class="hidden absolute inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
+        <div class="m3-dialog w-full max-w-md p-6 flex flex-col max-h-[90vh] pointer-events-auto">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-medium text-[#1d1b20] flex items-center gap-2">
-                    <span class="material-icons-outlined text-[#6750a4]">tune</span> アプリ設定
+                <h2 class="text-xl font-medium text-[#e6e1e5] flex items-center gap-2">
+                    <span class="material-icons-outlined text-[#d0bcff]">tune</span> システム構築室
                 </h2>
-                <button id="settings-close-btn" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200">
+                <button id="settings-close-btn" class="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-[#e6e1e5]">
                     <span class="material-icons-outlined">close</span>
                 </button>
             </div>
 
-            <div class="flex-grow overflow-y-auto space-y-5 pr-1">
-                <!-- 1. 通知テスト -->
-                <div class="p-4 m3-card bg-white">
-                    <h3 class="text-sm font-medium text-[#6750a4] mb-2 flex items-center gap-1"><span class="material-icons-outlined text-sm">notifications_active</span> 通知テスト機能</h3>
-                    <p class="text-xs text-slate-500 mb-3">ボタンを押すと、大網先生からの通知が即座にテスト送信されます。</p>
-                    <button id="test-notif-btn" class="w-full py-2.5 m3-btn-tonal text-sm font-medium flex items-center justify-center gap-2">
-                        <span class="material-icons-outlined text-sm">send</span> 大網先生からの通知をテスト
-                    </button>
+            <div class="flex-grow overflow-y-auto space-y-4 pr-1">
+                <!-- API KEY 配置 -->
+                <div class="p-4 m3-card">
+                    <h3 class="text-sm font-medium text-[#d0bcff] mb-2 flex items-center gap-1"><span class="material-icons-outlined text-sm">key</span> Gemini API Key</h3>
+                    <input type="password" id="api-key-input" placeholder="AI Studioで取得したAPIキーを入力" class="w-full m3-input text-xs">
+                    <button id="save-key-btn" class="w-full mt-3 py-2 m3-btn-primary text-xs">キーをシステムに記憶</button>
                 </div>
 
-                <!-- 2. カモフラージュ選択 -->
-                <div class="p-4 m3-card bg-white">
-                    <h3 class="text-sm font-medium text-[#6750a4] mb-2 flex items-center gap-1"><span class="material-icons-outlined text-sm">visibility</span> 自習画面（カモフラージュ）選択</h3>
-                    <div class="space-y-2">
-                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
-                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">functions</span> 数学の教科書</span>
-                            <input type="radio" name="camo-select" value="math" checked class="w-4 h-4 accent-[#6750a4]">
+                <!-- 自習科目選択 -->
+                <div class="p-4 m3-card">
+                    <h3 class="text-sm font-medium text-[#d0bcff] mb-2 flex items-center gap-1"><span class="material-icons-outlined text-sm">visibility</span> 自習画面選択</h3>
+                    <div class="space-y-1 text-xs text-[#e6e1e5]">
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-white/5 cursor-pointer">
+                            <span>数学の教科書</span><input type="radio" name="camo-select" value="math" checked class="w-4 h-4 accent-[#d0bcff]">
                         </label>
-                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
-                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">smart_display</span> スタサプ風（オンライン講義）</span>
-                            <input type="radio" name="camo-select" value="studysapuri" class="w-4 h-4 accent-[#6750a4]">
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-white/5 cursor-pointer">
+                            <span>スタサプ風映像授業</span><input type="radio" name="camo-select" value="studysapuri" class="w-4 h-4 accent-[#d0bcff]">
                         </label>
-                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
-                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">translate</span> 英語長文読解</span>
-                            <input type="radio" name="camo-select" value="english" class="w-4 h-4 accent-[#6750a4]">
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-white/5 cursor-pointer">
+                            <span>英語長文読解</span><input type="radio" name="camo-select" value="english" class="w-4 h-4 accent-[#d0bcff]">
                         </label>
-                        <label class="flex items-center justify-between p-2 rounded hover:bg-slate-50 cursor-pointer text-sm">
-                            <span class="flex items-center gap-2"><span class="material-icons-outlined text-slate-500">menu_book</span> 国語（羅生門・縦書き）</span>
-                            <input type="radio" name="camo-select" value="japanese" class="w-4 h-4 accent-[#6750a4]">
+                        <label class="flex items-center justify-between p-2 rounded hover:bg-white/5 cursor-pointer">
+                            <span>国語（羅生門）</span><input type="radio" name="camo-select" value="japanese" class="w-4 h-4 accent-[#d0bcff]">
                         </label>
                     </div>
                 </div>
             </div>
-
-            <!-- GitHub クレジット -->
-            <div class="mt-4 pt-3 border-t border-slate-200 text-center text-[11px] text-slate-400 font-medium tracking-wider uppercase flex items-center justify-center gap-1">
-                <span class="material-icons-outlined text-[14px]">code</span> Powered by GitHub
-            </div>
+            <div class="mt-4 pt-3 border-t border-white/10 text-center text-[10px] text-[#938f99] tracking-wider uppercase">Powered by GitHub</div>
         </div>
     </div>
 
-    <!-- 警告演出・スタート画面 -->
+    <!-- M3 スタート画面 -->
     <div id="warning-vignette"></div>
     <div id="start-screen">
-        <div class="mb-6 relative group">
-            <div class="text-9xl group-hover:scale-110 transition-transform cursor-default">👨‍🦲</div>
-            <div class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-2 py-1 font-bold rounded animate-bounce">ANGER</div>
-        </div>
-        <h1 class="text-5xl font-black mb-2 tracking-tighter italic">OAMI SURVIVAL</h1>
-        <p class="text-slate-400 mb-6 max-w-sm mx-auto text-sm leading-relaxed">
-            大網先生のリアリティを極限まで追求。<br>
-            先生がこちらを向いた時、あなたは「生徒」でいられるか。
-        </p>
-        
-        <div class="flex flex-col items-center gap-3 z-50">
-            <button id="auth-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-red-700 active:scale-95 transition-all pointer-events-auto flex items-center gap-1">
-                <span class="material-icons-outlined text-base">gpp_maybe</span> 大網先生の監視を受け入れる（通知を許可）
-            </button>
-            <button id="start-btn" class="bg-white text-slate-900 px-12 py-4 rounded-full text-xl font-black hover:bg-slate-200 transition-all shadow-xl active:scale-95 pointer-events-auto opacity-50 cursor-not-allowed" disabled>
-                入室を開始
-            </button>
+        <div class="text-8xl mb-4 select-none">👨‍🦲</div>
+        <h1 class="text-4xl font-black mb-1 italic tracking-tight text-[#e6e1e5]">OAMI SURVIVAL</h1>
+        <p class="text-[#ccc4dc] mb-8 text-xs max-w-xs leading-relaxed">目を離せば、大網の怒りは積もり続ける。<br>アプリ外ショートカット対応版</p>
+        <div class="flex flex-col items-center gap-3 z-50 w-full max-w-xs">
+            <button id="auth-btn" class="w-full py-2.5 m3-btn-tonal text-sm shadow-md">監視システム連動（通知許可）</button>
+            <button id="start-btn" class="w-full py-3.5 m3-btn-primary text-base shadow-lg opacity-40" disabled>自習室に入る</button>
         </div>
     </div>
 
     <script>
-        const messages = [
-            "まだ自習室でYouTube見てるの？",
-            "お前、YouTube見てるのバレてるからな。",
-            "勉強ちゃんとやってるの？",
-            "おい、スマホ触るのやめろ！",
-            "自習室の帝王をなめるなよ。",
-            "今、目が合ったな？勉強しなさい。"
-        ];
-
-        // --- 強制通知発行システム (アプリ前面でも確実に動くカスタム仕様) ---
-        function triggerImmediateNotificationDirect() {
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            
-            if (!('Notification' in window)) {
-                alert("📢 大網先生：「" + randomMessage + "」");
-                return;
+        // --- Badge API：怒り蓄積システム ---
+        let offlineAngerCount = parseInt(localStorage.getItem('offlineAnger')) || 0;
+        function updateAngerBadge(count) {
+            if ('setAppBadge' in navigator) {
+                if (count > 0) navigator.setAppBadge(count).catch(e => console.log(e));
+                else navigator.clearAppBadge().catch(e => console.log(e));
             }
-
-            if (Notification.permission === 'granted') {
-                // 1. まず標準の通知APIを前面で即発火させる
-                try {
-                    new Notification("大網先生", {
-                        body: randomMessage,
-                        icon: "icon.png",
-                        badge: "icon.png"
-                    });
-                } catch (e) {
-                    // 2. モバイルSafari/PWA等で上のコンストラクタが弾かれた場合は、Service Workerを強制経由
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.ready.then(reg => {
-                            reg.showNotification("大網先生", {
-                                body: randomMessage,
-                                icon: "icon.png"
-                            });
-                        });
-                    }
-                }
-            } else {
-                // 万が一権限が切れている場合はフォールバック
-                alert("📢 大網先生：「" + randomMessage + "」\n(通知権限がありません)");
-            }
+            localStorage.setItem('offlineAnger', count);
         }
 
-        // --- カモフラージュ画面のデータテンプレート ---
+        window.addEventListener('focus', () => {
+            const lastTime = localStorage.getItem('lastActiveTime');
+            if (lastTime) {
+                const passedTime = Date.now() - parseInt(lastTime);
+                const addedAnger = Math.floor(passedTime / 30000); // 30秒ごとに1蓄積
+                if (addedAnger > 0) {
+                    offlineAngerCount += addedAnger;
+                    updateAngerBadge(offlineAngerCount);
+                }
+            }
+            if (offlineAngerCount > 0) {
+                alert(`大網先生「お前、私がいない間で怒りバッジが【${offlineAngerCount}】まで溜まってるぞ。サボっていたな？」`);
+                offlineAngerCount = 0;
+                updateAngerBadge(0);
+            }
+        });
+        window.addEventListener('blur', () => localStorage.setItem('lastActiveTime', Date.now().toString()));
+
+        // --- App Shortcuts：初期パラメータ解析 ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const shortcutParam = urlParams.get('shortcut');
+        let initialCamo = shortcutParam || 'math';
+
         const camoTemplates = {
-            math: `
-                <div class="flex justify-between items-center border-b pb-1 mb-2">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-0.5"><span class="material-icons-outlined text-[10px]">functions</span> Advanced Math</span>
-                    <span class="text-[9px] text-slate-300 italic">Page 241</span>
-                </div>
-                <div class="space-y-1.5 text-slate-600">
-                    <div class="h-1.5 w-full bg-slate-100 rounded"></div>
-                    <div class="h-1.5 w-11/12 bg-slate-100 rounded"></div>
-                    <div class="my-2 p-3 bg-slate-50 border border-slate-100 rounded text-center">
-                        <span class="text-sm font-serif text-slate-500 italic">f(x) = ∫[a,b] sin(x²) dx</span>
-                    </div>
-                    <div class="h-1.5 w-full bg-slate-100 rounded"></div>
-                    <div class="h-1.5 w-3/4 bg-slate-100 rounded"></div>
-                </div>`,
-            studysapuri: `
-                <div class="w-full h-full flex flex-col bg-slate-950 text-white p-0 relative">
-                    <div class="bg-slate-900 px-3 py-1 flex items-center gap-1.5 border-b border-slate-800">
-                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                        <span class="text-[9px] font-bold text-slate-300 tracking-wide">第4講 英文法の極意 (関係代名詞)</span>
-                    </div>
-                    <div class="flex-grow flex bg-slate-900 relative items-center justify-center">
-                        <div class="absolute left-4 top-4 bg-slate-800 border border-slate-700 w-24 h-16 rounded flex flex-col p-1">
-                            <div class="w-full h-2 bg-cyan-500 rounded-sm mb-1"></div>
-                            <div class="space-y-0.5">
-                                <div class="h-1 w-full bg-slate-600 rounded"></div>
-                                <div class="h-1 w-4/5 bg-slate-600 rounded"></div>
-                            </div>
-                        </div>
-                        <div class="text-center font-bold text-cyan-400 text-xs tracking-wider animate-pulse">
-                            [ 講師：大網先生 (特別代講) ]<br>
-                            <span class="text-[9px] text-white/70 font-normal">01:24 / 45:00</span>
-                        </div>
-                    </div>
-                </div>`,
-            english: `
-                <div class="flex justify-between items-center border-b pb-1 mb-2">
-                    <span class="text-[9px] font-bold text-slate-400 uppercase flex items-center gap-0.5"><span class="material-icons-outlined text-[10px]">translate</span> English Reading</span>
-                    <span class="text-[9px] text-slate-300 italic">Lesson 7</span>
-                </div>
-                <div class="space-y-2 text-[10px] text-slate-700 font-serif leading-relaxed">
-                    <p class="font-bold text-slate-900">The Impact of Artificial Intelligence on Future Education.</p>
-                    <p>Many scientists believe that technology will fully optimize how humans acquire knowledge. However, the spiritual presence of a strict instructor remains irreplaceable...</p>
-                    <div class="h-1.5 w-2/3 bg-slate-100 rounded"></div>
-                </div>`,
-            japanese: `
-                <div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-2 font-serif">
-                    <div class="text-[8px] text-slate-400 border-b border-orange-200/60 pb-0.5 mb-1 flex justify-between">
-                        <span>国語一（総合）</span><span>芥川龍之介「羅生門」</span>
-                    </div>
-                    <div class="flex flex-row-reverse justify-start gap-3 h-full overflow-hidden text-right pr-2">
-                        <p class="vertical-text text-xs leading-loose font-medium">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。</p>
-                        <p class="vertical-text text-[10px] text-slate-500 leading-loose">広い門の下には、この男のほかに誰もいない。ただ、所々丹塗りの剥げた、大きな円柱に、</p>
-                    </div>
-                </div>`
+            math: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-[9px] font-bold text-slate-400 flex items-center gap-0.5"><span class="material-icons-outlined text-[10px]">functions</span> Advanced Math</span></div><div class="space-y-1.5 text-slate-600"><div class="h-1.5 w-full bg-slate-100 rounded"></div><div class="my-2 p-3 bg-slate-50 border border-slate-100 rounded text-center font-serif text-slate-500 italic">f(x) = ∫[a,b] sin(x²) dx</div></div>`,
+            studysapuri: `<div class="w-full h-full flex flex-col bg-slate-950 text-white p-0"><div class="bg-slate-900 px-3 py-1 flex items-center gap-1.5 text-[9px] font-bold border-b border-slate-800"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><span>第4講 英文法の極意</span></div><div class="flex-grow flex bg-slate-900 items-center justify-center text-center font-bold text-cyan-400 text-xs animate-pulse">[ 講師：大網先生 (特別講義) ]</div></div>`,
+            english: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-[9px] font-bold text-slate-400">English Reading</span></div><div class="space-y-2 text-[10px] text-slate-700 font-serif"><p class="font-bold">The Impact of AI on Future Education.</p><p>The spiritual presence of a strict instructor remains irreplaceable...</p></div>`,
+            japanese: `<div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-2 font-serif"><div class="text-[8px] text-slate-400 border-b border-orange-200 pb-0.5 mb-1 flex justify-between"><span>芥川龍之介「羅生門」</span></div><div class="flex flex-row-reverse justify-start h-full text-right"><p class="vertical-text text-xs leading-loose">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。</p></div></div>`
         };
 
-        let currentCamo = 'math';
         function setCamoScreen(type) {
-            currentCamo = type;
             const container = document.getElementById('screen-study');
             if(container) container.innerHTML = camoTemplates[type];
+            const radio = document.querySelector(`input[name="camo-select"][value="${type}"]`);
+            if (radio) radio.checked = true;
         }
 
-        // Service Worker 登録
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js').then((reg) => {
-                console.log('Service Worker Registered');
-            });
-        }
+        // --- Ami AI (Gemini API 厳格大網先生モデル) ---
+        let selectedBase64Image = null;
+        document.getElementById('ai-drag-handle').onclick = () => document.getElementById('ai-dock').classList.toggle('ai-collapsed');
 
-        // 設定画面の開閉制御
-        document.getElementById('settings-toggle-btn').onclick = () => {
-            document.getElementById('settings-dialog').classList.remove('hidden');
-        };
-        document.getElementById('settings-close-btn').onclick = () => {
-            document.getElementById('settings-dialog').classList.add('hidden');
-        };
-
-        // カモフラージュ切り替えイベント
-        document.querySelectorAll('input[name="camo-select"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                setCamoScreen(e.target.value);
-            });
-        });
-
-        // 【修正】テスト通知ボタンイベント（最強フォールバック関数を実行）
-        document.getElementById('test-notif-btn').onclick = () => {
-            triggerImmediateNotificationDirect();
+        document.getElementById('ai-file-input').onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('file-preview-name').innerText = `添付済: ${file.name}`;
+            document.getElementById('file-preview-name').classList.remove('hidden');
+            const reader = new FileReader();
+            reader.onload = (evt) => selectedBase64Image = evt.target.result.split(',')[1];
+            reader.readAsDataURL(file);
         };
 
-        // 通知権限の要求
-        document.getElementById('auth-btn').onclick = function() {
-            if (!('Notification' in window)) {
-                alert('このブラウザは通知に対応していません。iPadのホーム画面から起動してください。');
-                return;
+        document.getElementById('save-key-btn').onclick = () => {
+            const key = document.getElementById('api-key-input').value.trim();
+            if(key) { localStorage.setItem('gemini_api_key', key); alert('設定を保存した。'); }
+        };
+        if(localStorage.getItem('gemini_api_key')) document.getElementById('api-key-input').value = localStorage.getItem('gemini_api_key');
+
+        document.getElementById('ai-send-btn').onclick = async () => {
+            const apiKey = localStorage.getItem('gemini_api_key');
+            const textInput = document.getElementById('ai-text-input').value.trim();
+            if (!apiKey) { alert('先に設定画面からGemini API Keyを設定してください。'); return; }
+            if (!textInput && !selectedBase64Image) return;
+
+            const chatLog = document.getElementById('ai-chat-log');
+            const userMsgHtml = document.createElement('div');
+            userMsgHtml.className = "text-[#ccc4dc]";
+            userMsgHtml.innerText = `貴方「${textInput || "（画像を送信）"}」`;
+            chatLog.appendChild(userMsgHtml);
+            document.getElementById('ai-text-input').value = "";
+
+            const systemMsgHtml = document.createElement('div');
+            systemMsgHtml.className = "text-[#d0bcff] animate-pulse font-bold";
+            systemMsgHtml.innerText = "大網先生が答案を精査中...";
+            chatLog.appendChild(systemMsgHtml);
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            // プロンプトで大網先生のキャラクターを固定
+            const promptText = `あなたは非常に厳格で威圧的な、絶対に生徒のサボりを許さない伝説の塾講師「大網先生」です。
+ユーザー（塾生）からの質問・問題に対して、徹底的に正しく解説をしてください。その際、必ず以下のディレクションを守ること。
+・口調は厳しく、少し怖め。二人称は「お前」か「貴様」。
+・「こんな問題もわからないのか」「甘えるな」「自習室の帝王を舐めるな」といった説教を必ず織り交ぜる。
+・しかし、解説自体は数学、国語、英語などどんな内容であっても、論理的かつ完璧に行うこと。
+ユーザーの質問: ${textInput}`;
+
+            let parts = [{ text: promptText }];
+            if (selectedBase64Image) parts.push({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: parts }] })
+                });
+                const data = await response.json();
+                const replyText = data.candidates[0].content.parts[0].text;
+                systemMsgHtml.classList.remove('animate-pulse');
+                systemMsgHtml.className = "text-[#f2b8b5] font-bold";
+                systemMsgHtml.innerHTML = `大網先生「${replyText.replace(/\n/g, '<br>')}」`;
+            } catch (err) {
+                systemMsgHtml.className = "text-amber-500";
+                systemMsgHtml.innerText = "大網先生「エラーだ。通信環境すらまともに管理できないのか？」";
             }
-
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    alert('大網先生の監視が有効になりました。自習室へ入れます。');
-                    
-                    const startBtn = document.getElementById('start-btn');
-                    startBtn.disabled = false;
-                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    startBtn.classList.add('hover:bg-red-600', 'hover:text-white');
-                    
-                    this.style.display = 'none';
-
-                    if ('serviceWorker' in navigator) {
-                        navigator.serviceWorker.ready.then(reg => {
-                            if (reg.active) {
-                                reg.active.postMessage({ action: 'scheduleNotifications' });
-                            }
-                        });
-                    }
-                } else {
-                    alert('通知が拒否されました。設定アプリから通知を許可してください。');
-                }
-            });
+            selectedBase64Image = null;
+            document.getElementById('file-preview-name').classList.add('hidden');
+            chatLog.scrollTop = chatLog.scrollHeight;
         };
 
-        // --- Three.js ゲームコアロジック ---
-        let scene, camera, renderer, sensei, head, students = [];
+        // --- Three.js コア (ダークトーンM3最適化) ---
+        let scene, camera, renderer, sensei, students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
         let clock = new THREE.Clock();
         let aiTarget = new THREE.Vector3(0, 0, -8);
-        let aiState = 'WALK';
-        let aiTimer = 0;
+        let aiState = 'WALK'; let aiTimer = 0;
 
         function createDetailedPerson(isSensei = false, clothingColor = 0x2d3436) {
             const group = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffdbac });
             const clothMat = new THREE.MeshStandardMaterial({ color: clothingColor });
             const torso = new THREE.Group();
-            const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.3), clothMat);
-            chest.position.y = 1.25;
-            const waist = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.4, 0.25), clothMat);
-            waist.position.y = 0.95;
-            torso.add(chest, waist);
-            group.add(torso);
-
+            const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.3), clothMat); chest.position.y = 1.25;
+            const waist = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.4, 0.25), clothMat); waist.position.y = 0.95;
+            torso.add(chest, waist); group.add(torso);
             if (isSensei) {
-                const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-                shirt.position.set(0, 1.35, 0.15);
-                const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.25, 0.02), new THREE.MeshStandardMaterial({ color: 0x991b1b }));
-                tie.position.set(0, 1.25, 0.18);
+                const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.3, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff })); shirt.position.set(0, 1.35, 0.15);
+                const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.25, 0.02), new THREE.MeshStandardMaterial({ color: 0x991b1b })); tie.position.set(0, 1.25, 0.18);
                 torso.add(shirt, tie);
             }
-
-            const createArm = (side) => {
-                const arm = new THREE.Group();
-                const upper = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), clothMat);
-                upper.position.y = -0.2;
-                const lower = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.4, 0.16), clothMat);
-                lower.position.y = -0.6;
-                arm.add(upper, lower);
-                arm.position.set(side * 0.35, 1.45, 0);
-                return arm;
-            };
-            group.armL = createArm(-1);
-            group.armR = createArm(1);
+            group.armL = new THREE.Group(); group.armR = new THREE.Group();
+            const upper = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.4, 0.18), clothMat); upper.position.y = -0.2;
+            group.armL.add(upper.clone()); group.armL.position.set(-0.35, 1.45, 0);
+            group.armR.add(upper.clone()); group.armR.position.set(0.35, 1.45, 0);
             group.add(group.armL, group.armR);
 
             const createLeg = (side) => {
                 const leg = new THREE.Group();
-                const thigh = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.5, 0.22), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-                thigh.position.y = -0.25;
-                const shin = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.5, 0.18), new THREE.MeshStandardMaterial({ color: 0x1e293b }));
-                shin.position.y = -0.7;
-                leg.add(thigh, shin);
-                leg.position.set(side * 0.15, 0.8, 0);
-                return leg;
+                const t = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.5, 0.22), new THREE.MeshStandardMaterial({ color: 0x1d1b20 })); t.position.y = -0.25;
+                leg.add(t); leg.position.set(side * 0.15, 0.8, 0); return leg;
             };
-            group.legL = createLeg(-1);
-            group.legR = createLeg(1);
-            group.add(group.legL, group.legR);
+            group.legL = createLeg(-1); group.legR = createLeg(1); group.add(group.legL, group.legR);
 
             const headGroup = new THREE.Group();
-            const skull = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 32), skinMat);
-            skull.scale.set(0.9, 1.1, 1);
-            headGroup.add(skull);
-
+            const skull = new THREE.Mesh(new THREE.SphereGeometry(0.22, 16, 16), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
             if (isSensei) {
-                const eyeGeo = new THREE.SphereGeometry(0.025, 8, 8);
-                const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                const eL = new THREE.Mesh(eyeGeo, eyeMat);
-                eL.position.set(-0.08, 0.05, 0.18);
-                const eR = new THREE.Mesh(eyeGeo, eyeMat);
-                eR.position.set(0.08, 0.05, 0.18);
-                headGroup.add(eL, eR);
-                group.eyes = [eL, eR];
+                const eyeGeo = new THREE.SphereGeometry(0.025, 8, 8); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.08, 0.05, 0.18);
+                const eR = new THREE.Mesh(eyeGeo, eyeMat); eR.position.set(0.08, 0.05, 0.18);
+                headGroup.add(eL, eR); group.eyes = [eL, eR];
             } else {
-                const hairTypes = [
-                    () => {
-                        const h = new THREE.Mesh(new THREE.SphereGeometry(0.24, 16, 16, 0, Math.PI * 2, 0, Math.PI / 1.8), new THREE.MeshStandardMaterial({ color: 0x2d3436 }));
-                        h.scale.set(1.05, 1.1, 1.1);
-                        return h;
-                    },
-                    () => {
-                        const h = new THREE.Mesh(new THREE.SphereGeometry(0.23, 16, 16, 0, Math.PI * 2, 0, Math.PI / 2), new THREE.MeshStandardMaterial({ color: 0x4b3621 }));
-                        return h;
-                    }
-                ];
-                headGroup.add(hairTypes[Math.floor(Math.random() * hairTypes.length)]());
+                const h = new THREE.Mesh(new THREE.SphereGeometry(0.23, 16, 8, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshStandardMaterial({ color: 0x2d3436 })); headGroup.add(h);
             }
-            headGroup.position.y = 1.6;
-            group.add(headGroup);
-            group.head = headGroup;
+            headGroup.position.y = 1.6; group.add(headGroup); group.head = headGroup;
             return group;
         }
 
         function init() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xf1f5f9);
-            scene.fog = new THREE.Fog(0xf1f5f9, 5, 40);
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 2.2, 6.5);
-            camera.lookAt(0, 1.2, 0);
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true;
-            document.body.appendChild(renderer.domElement);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-            const light = new THREE.DirectionalLight(0xffffff, 0.8);
-            light.position.set(10, 20, 10);
-            light.castShadow = true;
-            scene.add(light);
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x141218); scene.fog = new THREE.Fog(0x141218, 5, 35);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 2.2, 6.5); camera.lookAt(0, 1.2, 0);
+            renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+            const light = new THREE.DirectionalLight(0xffffff, 0.6); light.position.set(5, 15, 5); scene.add(light);
 
-            const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0xe2e8f0 }));
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x1d1b20 })); floor.rotation.x = -Math.PI / 2; scene.add(floor);
 
             for (let x = -8; x <= 8; x += 4) {
                 for (let z = -12; z <= 4; z += 4) {
                     const desk = new THREE.Group();
-                    const top = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.1, 1.5), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-                    top.position.y = 0.9;
-                    top.castShadow = true;
-                    top.receiveShadow = true;
-                    desk.add(top);
-                    desk.position.set(x, 0, z);
-                    scene.add(desk);
+                    const top = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.1, 1.5), new THREE.MeshStandardMaterial({ color: 0x2b2930 })); top.position.y = 0.9; desk.position.set(x, 0, z); desk.add(top); scene.add(desk);
                     if (x !== 0 || z !== 4) {
-                        const s = createDetailedPerson(false, Math.random() * 0xffffff);
-                        s.position.set(x, 0, z + 1);
-                        s.rotation.y = Math.PI;
-                        s.head.rotation.x = 0.6;
-                        scene.add(s);
-                        students.push(s);
+                        const s = createDetailedPerson(false, 0x36343b); s.position.set(x, 0, z + 1); s.rotation.y = Math.PI; s.head.rotation.x = 0.5; scene.add(s); students.push(s);
                     }
                 }
             }
-
-            sensei = createDetailedPerson(true, 0x1e293b);
-            sensei.position.set(0, 0, -10);
-            scene.add(sensei);
-
-            setCamoScreen('math');
+            sensei = createDetailedPerson(true, 0x4a4458); sensei.position.set(0, 0, -10); scene.add(sensei);
+            setCamoScreen(initialCamo);
 
             const startAction = (e) => {
-                if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog')) return;
-                isWatching = true;
-                document.getElementById('screen-study').classList.add('hidden');
-                document.getElementById('screen-youtube').classList.remove('hidden');
-                document.getElementById('youtube-device').classList.add('active-view');
+                if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock')) return;
+                isWatching = true; document.getElementById('screen-study').classList.add('hidden'); document.getElementById('screen-youtube').classList.remove('hidden'); document.getElementById('youtube-device').classList.add('active-view');
             };
             const stopAction = (e) => {
-                if (e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog')) return;
-                isWatching = false;
-                document.getElementById('screen-study').classList.remove('hidden');
-                document.getElementById('screen-youtube').classList.add('hidden');
-                document.getElementById('youtube-device').classList.remove('remove-view');
-                document.getElementById('youtube-device').classList.remove('active-view');
+                if (e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock')) return;
+                isWatching = false; document.getElementById('screen-study').classList.remove('hidden'); document.getElementById('screen-youtube').classList.add('hidden'); document.getElementById('youtube-device').classList.remove('active-view');
             };
-            window.addEventListener('mousedown', startAction);
-            window.addEventListener('mouseup', stopAction);
-            window.addEventListener('touchstart', startAction);
-            window.addEventListener('touchend', stopAction);
+            window.addEventListener('mousedown', startAction); window.addEventListener('mouseup', stopAction);
+            window.addEventListener('touchstart', startAction); window.addEventListener('touchend', stopAction);
             animate();
         }
 
         function updateAI() {
-            const dt = clock.getDelta();
-            const time = Date.now() * 0.005;
-            aiTimer -= 1;
+            const time = Date.now() * 0.005; aiTimer -= 1;
             if (aiState === 'WALK') {
                 let dist = sensei.position.distanceTo(aiTarget);
                 if (dist > 0.2) {
                     let dir = aiTarget.clone().sub(sensei.position).normalize();
-                    sensei.position.add(dir.multiplyScalar(0.04));
+                    sensei.position.add(dir.multiplyScalar(0.035));
                     sensei.rotation.y = THREE.MathUtils.lerp(sensei.rotation.y, Math.atan2(dir.x, dir.z), 0.1);
-                    sensei.legL.rotation.x = Math.sin(time) * 0.45;
-                    sensei.legR.rotation.x = Math.cos(time) * 0.45;
-                    sensei.armL.rotation.x = Math.cos(time) * 0.3;
-                    sensei.armR.rotation.x = Math.sin(time) * 0.3;
-                } else {
-                    aiState = 'INSPECT';
-                    aiTimer = 80 + Math.random() * 150;
-                }
+                    sensei.legL.rotation.x = Math.sin(time) * 0.4; sensei.legR.rotation.x = Math.cos(time) * 0.4;
+                } else { aiState = 'INSPECT'; aiTimer = 80 + Math.random() * 120; }
             } else if (aiState === 'INSPECT') {
-                sensei.legL.rotation.x = 0;
-                sensei.legR.rotation.x = 0;
-                sensei.armL.rotation.x = 0.1;
-                sensei.armR.rotation.x = 0.1;
-                sensei.head.rotation.y = Math.sin(time * 0.4) * 1.3;
-                if (aiTimer <= 0) {
-                    aiState = 'WALK';
-                    aiTarget.set((Math.random() - 0.5) * 14, 0, (Math.random() - 0.5) * 20 - 4);
-                }
+                sensei.legL.rotation.x = 0; sensei.legR.rotation.x = 0;
+                sensei.head.rotation.y = Math.sin(time * 0.4) * 1.2;
+                if (aiTimer <= 0) { aiState = 'WALK'; aiTarget.set((Math.random() - 0.5) * 12, 0, (Math.random() - 0.5) * 16 - 2); }
             }
 
             const playerPos = new THREE.Vector3(0, 0, 5);
             const dist = sensei.position.distanceTo(playerPos);
             const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(sensei.head.getWorldQuaternion(new THREE.Quaternion()));
-            const toPlayer = playerPos.clone().sub(sensei.position).normalize();
-            const dot = forward.dot(toPlayer);
+            const dot = forward.dot(playerPos.clone().sub(sensei.position).normalize());
 
             if (isWatching) {
-                score += 2;
-                document.getElementById('score-text').innerText = score.toString().padStart(4, '0');
-                document.getElementById('yt-progress').style.width = (score / 10 % 100) + "%";
+                score += 1; document.getElementById('score-text').innerText = score.toString().padStart(4, '0');
+                document.getElementById('yt-progress').style.width = (score % 100) + "%";
                 if (dot > 0.45 && dist < 11) {
-                    suspicion += 2.2;
-                    document.getElementById('warning-vignette').style.opacity = "1";
-                    sensei.eyes.forEach(e => e.material.color.set(0xff0000));
+                    suspicion += 2.0; document.getElementById('warning-vignette').style.opacity = "1";
+                    sensei.eyes.forEach(e => e.material.color.set(0xff5555));
                 } else {
-                    suspicion = Math.max(0, suspicion - 0.2);
-                    document.getElementById('warning-vignette').style.opacity = "0";
+                    suspicion = Math.max(0, suspicion - 0.2); document.getElementById('warning-vignette').style.opacity = "0";
                     sensei.eyes.forEach(e => e.material.color.set(0x000000));
                 }
             } else {
-                suspicion = Math.max(0, suspicion - 1.2);
-                document.getElementById('warning-vignette').style.opacity = "0";
+                suspicion = Math.max(0, suspicion - 1.0); document.getElementById('warning-vignette').style.opacity = "0";
                 sensei.eyes.forEach(e => e.material.color.set(0x000000));
             }
             document.getElementById('suspicion-bar').style.width = suspicion + "%";
             if (suspicion >= 100) gameOver();
         }
 
-        function animate() {
-            requestAnimationFrame(animate);
-            if (gameActive) updateAI();
-            renderer.render(scene, camera);
-        }
-
+        function animate() { requestAnimationFrame(animate); if (gameActive) updateAI(); renderer.render(scene, camera); }
         function gameOver() {
-            gameActive = false;
-            document.getElementById('start-screen').style.display = 'flex';
+            gameActive = false; document.getElementById('start-screen').style.display = 'flex';
             document.getElementById('start-screen').querySelector('h1').innerText = "DISMISSED";
-            document.getElementById('start-screen').querySelector('p').innerHTML = `<span class='text-red-500 font-black text-2xl'>Score: ${score}</span><br><br>大網先生「...今の動画、面白かったか？」`;
-            document.getElementById('start-btn').innerText = "反省して再入室";
-            isWatching = false;
+            document.getElementById('start-screen').querySelector('p').innerHTML = `<span class='text-[#f2b8b5] font-black text-2xl'>Score: ${score}</span><br><br>大網先生「...お前、そこまでして動画が見たいか？」`;
+            document.getElementById('start-btn').innerText = "反省して再入室"; isWatching = false;
         }
 
-        document.getElementById('start-btn').onclick = () => {
-            if(document.getElementById('start-btn').disabled) return;
-            score = 0;
-            suspicion = 0;
-            gameActive = true;
-            document.getElementById('start-screen').style.display = 'none';
-        };
-
-        window.onresize = () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        };
+        document.getElementById('start-btn').onclick = () => { score = 0; suspicion = 0; gameActive = true; document.getElementById('start-screen').style.display = 'none'; };
+        document.getElementById('auth-btn').onclick = function() { Notification.requestPermission().then(p => { if(p==='granted') { document.getElementById('start-btn').disabled=false; document.getElementById('start-btn').classList.remove('opacity-40'); this.style.display='none'; } }); };
+        window.onresize = () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
         window.onload = init;
     </script>
 </body>
