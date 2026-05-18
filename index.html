@@ -24,10 +24,12 @@
             background: #060d10; 
             width: 100vw; 
             height: 100vh;
-            height: 100dvh; 
+            /* キーボード表示時の浮き上がりを防ぐためfixedで画面全体に固定 */
             position: fixed;
             top: 0;
             left: 0;
+            right: 0;
+            bottom: 0;
             touch-action: manipulation; 
             -webkit-overflow-scrolling: auto;
             -webkit-user-select: none;
@@ -36,17 +38,26 @@
             box-sizing: border-box;
         }
 
-        /* iPad等の横画面隙間対策: Three.jsのキャンバスを完全に画面裏に固定 */
+        /* iPad横画面・キーボード追従バグ完全対策用キャンバス固定 */
         canvas {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100% !important;
-            height: 100% !important;
+            width: 100vw !important;
+            height: 100vh !important;
             z-index: 1;
         }
 
-        #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; height: 100dvh; box-sizing: border-box; }
+        #ui-layer { 
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; 
+            z-index: 50; 
+            box-sizing: border-box; 
+        }
         
         /* --- Material 3 Design System --- */
         .m3-hud { background: rgba(26, 43, 53, 0.85); backdrop-filter: blur(24px); border-radius: 24px; color: #e1e3e5; padding: 14px 24px; box-shadow: 0 12px 32px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); }
@@ -56,6 +67,7 @@
         /* Buttons & Inputs */
         .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
         .m3-btn-primary:hover { background: #b3e5ff; transform: scale(1.02); }
+        .m3-btn-primary:disabled { opacity: 0.4; pointer-events: none; }
         .m3-btn-tonal { background: #2f4a57; color: #bbe6ff; border-radius: 100px; font-weight: 500; transition: all 0.2s; padding: 12px 28px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
         .m3-btn-tonal:hover { background: #3f6071; }
         .m3-btn-icon { background: #172a35; color: #bbe6ff; border-radius: 100px; transition: all 0.2s; border: 1px solid #3d5866; z-index: 250; pointer-events: auto; touch-action: manipulation; }
@@ -65,9 +77,9 @@
         /* カモフラージュスマホデバイス */
         #youtube-device { position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%); width: 440px; height: 250px; border-radius: 36px; overflow: hidden; border: 12px solid #1a2b35; background: #fff; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .active-view { transform: translateX(-50%) translateY(-20px) scale(1.05); }
-        #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 20%, rgba(255, 10, 10, 0.6) 100%); opacity: 0; transition: opacity 0.1s; z-index: 40; }
+        #warning-vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 20%, rgba(255, 10, 10, 0.6) 100%); opacity: 0; transition: opacity 0.1s; z-index: 40; }
         
-        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; background: #04080a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
+        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; background: #04080a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
         
         #gemini-ai-trigger {
             position: absolute; bottom: 40px; right: 40px; height: 64px; padding: 0 28px; border-radius: 32px;
@@ -80,7 +92,7 @@
         
         /* Ami AI サイドバー */
         #ai-dock { 
-            position: absolute; top: 0; right: 0; width: 420px; height: 100%; height: 100dvh;
+            position: fixed; top: 0; right: 0; width: 420px; height: 100vh;
             background: rgba(23, 42, 53, 0.97); backdrop-filter: blur(24px);
             z-index: 150; border-left: 1px solid rgba(255,255,255,0.1); 
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
@@ -297,9 +309,9 @@
             <div id="boot-log-text"></div>
         </div>
 
-        <div id="boot-actions" class="flex flex-col items-center gap-4 w-full max-w-sm z-[520]">
+        <div id="boot-actions" class="flex flex-col items-center gap-4 w-full max-w-sm z-[520] hidden opacity-0 transition-all duration-500">
             <button id="auth-btn" class="w-full m3-btn-tonal pointer-events-auto"><span class="material-icons-outlined">notifications_active</span>監視システム連動（必須認証）</button>
-            <button id="start-btn" class="w-full m3-btn-primary opacity-40 pointer-events-none" disabled><span class="material-icons-outlined">login</span>覚悟を決めて入室する</button>
+            <button id="start-btn" class="w-full m3-btn-primary" disabled><span class="material-icons-outlined">login</span>覚悟を決めて入室する</button>
         </div>
     </div>
 
@@ -307,15 +319,17 @@
         const GEMINI_API_KEY = "AIzaSyA9eQLOWdnG7PQxVOd9c8-htnxhSqbvP6w";
         let initialCamo = "math";
 
-        // --- 🔊 Web Audio API リアルタイム効果音生成システム ---
+        // --- 🔊 Web Audio API リアルタイム効果音生成システム (安定化強化) ---
         let audioCtx = null;
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
 
-        // 定番のタップ音
         function playSoundTap() {
             initAudio(); if (!audioCtx) return;
             const osc = audioCtx.createOscillator();
@@ -329,16 +343,15 @@
             osc.start(); osc.stop(audioCtx.currentTime + 0.1);
         }
 
-        // サボり中（YouTube再生中）のチープなBGM波形ループ
         let bleepInterval = null;
         function startSaboriSound() {
             initAudio(); if (!audioCtx || bleepInterval) return;
             bleepInterval = setInterval(() => {
-                if(!audioCtx) return;
+                if(!audioCtx || audioCtx.state === 'suspended') return;
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
                 osc.type = 'triangle';
-                const notes = [261.6, 329.6, 392.0, 523.3]; // C, E, G, C
+                const notes = [261.6, 329.6, 392.0, 523.3];
                 const randomNote = notes[Math.floor(Math.random() * notes.length)];
                 osc.frequency.setValueAtTime(randomNote, audioCtx.currentTime);
                 gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
@@ -352,7 +365,6 @@
             if (bleepInterval) { clearInterval(bleepInterval); bleepInterval = null; }
         }
 
-        // 大網先生に見つかっている瞬間の警告不協和音
         let dangerSoundOsc1 = null, dangerSoundOsc2 = null, dangerGain = null;
         function startDangerAlarm() {
             initAudio(); if (!audioCtx || dangerSoundOsc1) return;
@@ -363,7 +375,7 @@
             dangerSoundOsc1.type = 'sawtooth';
             dangerSoundOsc1.frequency.setValueAtTime(95, audioCtx.currentTime);
             dangerSoundOsc2.type = 'sawtooth';
-            dangerSoundOsc2.frequency.setValueAtTime(99, audioCtx.currentTime); // わずかにずらして不協和音を生成
+            dangerSoundOsc2.frequency.setValueAtTime(99, audioCtx.currentTime);
             
             dangerGain.gain.setValueAtTime(0.12, audioCtx.currentTime);
             
@@ -381,7 +393,6 @@
             }
         }
 
-        // ゲームオーバー時の破滅ホラー音
         function playSoundGameOver() {
             initAudio(); if (!audioCtx) return;
             stopDangerAlarm(); stopSaboriSound();
@@ -429,6 +440,7 @@
             const logBox = document.getElementById('boot-log-text');
             const logContainer = document.getElementById('boot-log-container');
             const content = document.getElementById('boot-content');
+            const actions = document.getElementById('boot-actions');
             
             let lineIndex = 0;
             function printLine() {
@@ -448,6 +460,13 @@
                             logContainer.style.display = 'none';
                             content.classList.remove('opacity-0', 'scale-95');
                             content.classList.add('opacity-1', 'scale-100');
+                            
+                            // ログ終了後に初めて起動ボタンをフェードイン表示
+                            actions.classList.remove('hidden');
+                            setTimeout(() => {
+                                actions.classList.remove('opacity-0');
+                            }, 50);
+
                             if (Notification.permission === 'granted') activateStartButton();
                         }, 300);
                     }, 300);
@@ -462,11 +481,11 @@
             if(authBtn) authBtn.style.display = 'none';
             if(startBtn) {
                 startBtn.disabled = false;
-                startBtn.classList.remove('opacity-40', 'pointer-events-none');
+                startBtn.style.opacity = "1";
             }
         }
 
-        // ポモドーロタイマーロジック
+        // ポモドーロタイマー
         let pomoMinutesStudy = 25;
         let pomoMinutesBreak = 5;
         let pomoSecondsLeft = pomoMinutesStudy * 60;
@@ -514,7 +533,7 @@
                             pomoSecondsLeft = pomoMinutesStudy * 60;
                             pomoBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME`;
                             pomoBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8";
-                            alert(`大網先生 reply「休憩終わりだ、${userName}！机に向かえ！」`);
+                            alert(`大網先生「休憩終わりだ、${userName}！机に向かえ！」`);
                         }
                         updatePomoClockUI();
                     }
@@ -626,6 +645,12 @@
             let parts = [{ text: `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（名前:${userName}）からの質問に徹底的に解説しつつ、適度にお説教を織り交ぜて回答してください。\n質問: ${textInput || "添付した画像を確認しろ"}` }];
             if (selectedBase64Image) parts.unshift({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
 
+            // 安定化：リクエスト直前に値をローカルに退避させ、フォーム側は即初期化
+            const imageToSend = selectedBase64Image;
+            selectedBase64Image = null;
+            document.getElementById('ai-file-input').value = ""; // 👈 2回目エラーバグの主犯を検挙・リセット
+            document.getElementById('file-preview-name').classList.add('hidden');
+
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
                     method: 'POST', 
@@ -644,7 +669,6 @@
                 systemMsgHtml.className = "text-amber-400 mb-2"; 
                 systemMsgHtml.innerText = "大網先生「通信エラーだ！キーが間違っているか、記述に不備があるぞ！」";
             }
-            selectedBase64Image = null; document.getElementById('file-preview-name').classList.add('hidden');
         };
 
         document.getElementById('settings-toggle-btn').onclick = (e) => { e.stopPropagation(); playSoundTap(); document.getElementById('settings-dialog').classList.remove('hidden'); };
@@ -814,7 +838,6 @@
             if (savedName) document.getElementById('user-nickname-input').value = savedName;
             updatePomoClockUI();
 
-            // 🔊 画面ホールド操作（サボる／戻る）時の音響トリガー
             const startAction = (e) => {
                 if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger') || e.target.closest('#pomodoro-toggle-btn') || e.target.closest('#pomodoro-screen')) return;
                 initAudio();
@@ -880,7 +903,7 @@
                     document.getElementById('warning-vignette').style.opacity = "1";
                     if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.setHex(0xff0000));
                     sensei.head.rotation.x = -0.15;
-                    startDangerAlarm(); // 🔊 視線が合っている最中のアラーム
+                    startDangerAlarm(); 
                 } else {
                     suspicion = Math.max(0, suspicion - 0.5); 
                     document.getElementById('warning-vignette').style.opacity = "0";
@@ -902,7 +925,7 @@
         
         function gameOver() {
             gameActive = false; 
-            playSoundGameOver(); // 🔊 ゲームオーバー音
+            playSoundGameOver(); 
             const userName = getUserName();
             const startScreen = document.getElementById('start-screen');
             startScreen.style.display = 'flex';
@@ -910,10 +933,14 @@
             document.getElementById('boot-title').innerText = "DISMISSED";
             document.getElementById('boot-sub').innerHTML = `<span class='text-red-500 font-black text-3xl'>Score: ${score}</span><br><br>大網先生「...おい${userName}、そこまでして動画が見たいか？ 荷物をまとめて今すぐ出ていけ！」`;
             
+            const actions = document.getElementById('boot-actions');
+            actions.classList.remove('hidden');
+            actions.style.opacity = "1";
+
             const startBtn = document.getElementById('start-btn');
             startBtn.innerHTML = `<span class="material-icons-outlined">refresh</span>反省して再入室`; 
             startBtn.disabled = false;
-            startBtn.classList.remove('opacity-40', 'pointer-events-none');
+            startBtn.style.opacity = "1";
             
             const authBtn = document.getElementById('auth-btn');
             if (authBtn) authBtn.style.display = 'none';
@@ -931,12 +958,28 @@
             Notification.requestPermission().then(p => { if(p==='granted') activateStartButton(); }); 
         };
         
-        // 🛠️ リサイズ処理でアスペクト比と描画バッファのサイズをデバイスピクセル比に合わせて厳密に更新
-        window.onresize = () => { 
-            camera.aspect = window.innerWidth / window.innerHeight; 
+        // 🛠️ iPadの画面サイズリサイズと、キーボードによるVisual Viewport変動の同時バグ対策
+        function handleResize() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            camera.aspect = width / height; 
             camera.updateProjectionMatrix(); 
-            renderer.setSize(window.innerWidth, window.innerHeight); 
-        };
+            renderer.setSize(width, height); 
+
+            // キーボード表示時に全体がずり上がるのを防ぐため、強制的に(0,0)に固定
+            window.scrollTo(0, 0);
+        }
+
+        window.addEventListener('resize', handleResize);
+        if (window.visualViewport) {
+            // iPadOSのソフトウェアキーボード出現に伴う高低差のズレを中和する
+            window.visualViewport.addEventListener('resize', () => {
+                window.scrollTo(0, 0);
+                document.body.style.top = "0px";
+                document.body.style.height = "100vh";
+            });
+            window.visualViewport.addEventListener('scroll', () => window.scrollTo(0, 0));
+        }
         window.onload = init3D;
     </script>
 </body>
