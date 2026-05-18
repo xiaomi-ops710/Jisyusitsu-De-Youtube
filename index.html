@@ -85,30 +85,63 @@
             <div class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-2 py-1 font-bold rounded animate-bounce">ANGER</div>
         </div>
         <h1 class="text-5xl font-black mb-2 tracking-tighter italic">OAMI SURVIVAL</h1>
-        <p class="text-slate-400 mb-10 max-w-sm mx-auto text-sm leading-relaxed">
+        <p class="text-slate-400 mb-6 max-w-sm mx-auto text-sm leading-relaxed">
             大網先生のリアリティを極限まで追求。<br>
             先生がこちらを向いた時、あなたは「生徒」でいられるか。
         </p>
-        <button id="start-btn" class="bg-white text-slate-900 px-12 py-4 rounded-full text-xl font-black hover:bg-red-600 hover:text-white transition-all shadow-xl active:scale-95 pointer-events-auto">
-            入室を開始
-        </button>
+        
+        <!-- iOS対策：通知権限を明示的に呼び出すための個別ボタン -->
+        <div class="flex flex-col items-center gap-3 z-50">
+            <button id="auth-btn" class="bg-red-600 text-white px-6 py-2 rounded-lg text-sm font-bold shadow-lg hover:bg-red-700 active:scale-95 transition-all pointer-events-auto">
+                🚨 大網先生の監視を受け入れる（通知を許可）
+            </button>
+            <button id="start-btn" class="bg-white text-slate-900 px-12 py-4 rounded-full text-xl font-black hover:bg-slate-200 transition-all shadow-xl active:scale-95 pointer-events-auto opacity-50 cursor-not-allowed" disabled>
+                入室を開始（まず通知を許可してください）
+            </button>
+        </div>
     </div>
+
     <script>
-        // PWA用のService Workerと通知登録
+        // Service Workerの事前登録
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').then((reg) => {
                 console.log('Service Worker Registered');
-                // 通知許可を要求
-                Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                        // Service Worker側にランダム通知のスケジュールを命令
-                        if (reg.active) {
-                            reg.active.postMessage({ action: 'scheduleNotifications' });
-                        }
-                    }
-                });
-            });
+            }).catch(err => console.log('SW Register Error:', err));
         }
+
+        // 通知許可ボタンのクリックイベント（ユーザー操作の直結）
+        document.getElementById('auth-btn').onclick = function() {
+            if (!('Notification' in window)) {
+                alert('このブラウザは通知に対応していません。iPadのホーム画面から起動してください。');
+                return;
+            }
+
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    alert('大網先生の監視が有効になりました。自習室へ入れます。');
+                    
+                    // 「入室を開始」ボタンをアクティブにする
+                    const startBtn = document.getElementById('start-btn');
+                    startBtn.disabled = false;
+                    startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    startBtn.classList.add('hover:bg-red-600', 'hover:text-white');
+                    
+                    // 許可ボタンを非表示にする
+                    this.style.display = 'none';
+
+                    // Service Workerに通知スケジュール命令を送る
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(reg => {
+                            if (reg.active) {
+                                reg.active.postMessage({ action: 'scheduleNotifications' });
+                            }
+                        });
+                    }
+                } else if (permission === 'denied') {
+                    alert('通知が拒否されました。iPadの設定アプリから「大網サバイバル」の通知を許可してください。');
+                }
+            });
+        };
 
         let scene, camera, renderer, sensei, head, students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
@@ -340,6 +373,7 @@
         }
 
         document.getElementById('start-btn').onclick = () => {
+            if(document.getElementById('start-btn').disabled) return;
             score = 0;
             suspicion = 0;
             gameActive = true;
