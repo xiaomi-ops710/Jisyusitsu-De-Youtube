@@ -23,8 +23,8 @@
             overflow: hidden; 
             background: #060d10; 
             width: 100vw; 
-            height: 100vh;
-            /* キーボード表示時の浮き上がりを防ぐためfixedで画面全体に固定 */
+            /* iPadのキーボードバグを防ぐためJS側で高さを厳密に制御するが初期値は100% */
+            height: 100%;
             position: fixed;
             top: 0;
             left: 0;
@@ -38,22 +38,32 @@
             box-sizing: border-box;
         }
 
-        /* iPad横画面・キーボード追従バグ完全対策用キャンバス固定 */
-        canvas {
-            position: fixed;
+        /* 画面全体の絶対的な受け皿 */
+        #app-viewport-wrapper {
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* iPad横画面・キーボード追従バグ完全対策用キャンバス */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
             z-index: 1;
         }
 
         #ui-layer { 
-            position: fixed; 
+            position: absolute; 
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             pointer-events: none; 
             z-index: 50; 
             box-sizing: border-box; 
@@ -77,9 +87,9 @@
         /* カモフラージュスマホデバイス */
         #youtube-device { position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%); width: 440px; height: 250px; border-radius: 36px; overflow: hidden; border: 12px solid #1a2b35; background: #fff; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .active-view { transform: translateX(-50%) translateY(-20px) scale(1.05); }
-        #warning-vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 20%, rgba(255, 10, 10, 0.6) 100%); opacity: 0; transition: opacity 0.1s; z-index: 40; }
+        #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 20%, rgba(255, 10, 10, 0.6) 100%); opacity: 0; transition: opacity 0.1s; z-index: 40; }
         
-        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; background: #04080a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
+        .m3-overlay-screen { position: absolute; inset: 0; width: 100%; height: 100%; background: #04080a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
         
         #gemini-ai-trigger {
             position: absolute; bottom: 40px; right: 40px; height: 64px; padding: 0 28px; border-radius: 32px;
@@ -92,7 +102,7 @@
         
         /* Ami AI サイドバー */
         #ai-dock { 
-            position: fixed; top: 0; right: 0; width: 420px; height: 100vh;
+            position: absolute; top: 0; right: 0; width: 420px; height: 100%;
             background: rgba(23, 42, 53, 0.97); backdrop-filter: blur(24px);
             z-index: 150; border-left: 1px solid rgba(255,255,255,0.1); 
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
@@ -136,182 +146,184 @@
     </style>
 </head>
 <body class="bg-pulse-horror">
-    <div id="ui-layer">
-        <div class="absolute top-8 left-8 m3-hud min-w-[160px]">
-            <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest">自習継続 Score</div>
-            <div id="score-text" class="text-4xl font-black text-[#7cd4ff]">0000</div>
-        </div>
-
-        <div class="absolute top-8 right-[240px] m3-hud w-56">
-            <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest mb-1.5 text-right">大網先生の不審度</div>
-            <div class="h-2.5 w-full bg-[#223a47] rounded-full overflow-hidden">
-                <div id="suspicion-bar" class="h-full bg-red-500 w-0 transition-all duration-75"></div>
+    <div id="app-viewport-wrapper">
+        <div id="ui-layer">
+            <div class="absolute top-8 left-8 m3-hud min-w-[160px]">
+                <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest">自習継続 Score</div>
+                <div id="score-text" class="text-4xl font-black text-[#7cd4ff]">0000</div>
             </div>
-        </div>
 
-        <button id="pomodoro-toggle-btn" class="absolute top-8 right-[150px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
-            <span class="material-icons-outlined text-2xl text-amber-300">hourglass_empty</span>
-        </button>
-
-        <button id="settings-toggle-btn" class="absolute top-8 right-[70px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
-            <span class="material-icons-outlined text-2xl">settings</span>
-        </button>
-
-        <button id="gemini-ai-trigger">
-            <span class="material-icons-outlined text-2xl">psychology</span>
-            <span>Ami AIに質問</span>
-        </button>
-    </div>
-
-    <div id="youtube-device" style="pointer-events: none; z-index: 45;">
-        <div id="screen-study" class="w-full h-full p-5 flex flex-col bg-[#fcfbfa] overflow-hidden text-slate-800"></div>
-        <div id="screen-youtube" class="hidden w-full h-full bg-black flex flex-col">
-            <div class="p-3 flex items-center gap-1 bg-zinc-900">
-                <span class="text-red-600 font-black text-base tracking-tighter">YouTube<span class="bg-red-600 text-white text-[9px] px-1 ml-1 rounded-sm">JP</span></span>
-            </div>
-            <div class="flex-grow flex items-center justify-center relative bg-zinc-800 overflow-hidden">
-                <div class="absolute inset-0 bg-gradient-to-tr from-red-600 via-purple-600 to-blue-600 opacity-40 animate-pulse"></div>
-                <div class="z-10 text-center">
-                    <div class="text-white font-black text-base italic tracking-wide">AMAZING OAMI DANCE</div>
+            <div class="absolute top-8 right-[240px] m3-hud w-56">
+                <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest mb-1.5 text-right">大網先生の不審度</div>
+                <div class="h-2.5 w-full bg-[#223a47] rounded-full overflow-hidden">
+                    <div id="suspicion-bar" class="h-full bg-red-500 w-0 transition-all duration-75"></div>
                 </div>
             </div>
-            <div class="p-1.5 bg-zinc-900">
-                <div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
-                    <div id="yt-progress" class="h-full bg-red-600" style="width: 0%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div id="warning-vignette"></div>
+            <button id="pomodoro-toggle-btn" class="absolute top-8 right-[150px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
+                <span class="material-icons-outlined text-2xl text-amber-300">hourglass_empty</span>
+            </button>
 
-    <div id="ai-dock" class="ai-collapsed p-6 pointer-events-auto">
-        <div class="flex items-center justify-between pb-4 border-b border-[#3d5866] mb-4">
-            <div class="flex items-center gap-2">
-                <div class="text-base font-bold text-white flex items-center gap-1.5">
-                    <span class="material-icons-outlined text-xl text-[#7cd4ff]">smart_toy</span> Ami AI
-                </div>
-                <span class="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full font-black tracking-wider uppercase shadow-sm">Beta</span>
-            </div>
-            <button id="ai-close-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-[#bbe6ff]">
-                <span class="material-icons-outlined text-2xl">close</span>
+            <button id="settings-toggle-btn" class="absolute top-8 right-[70px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
+                <span class="material-icons-outlined text-2xl">settings</span>
+            </button>
+
+            <button id="gemini-ai-trigger">
+                <span class="material-icons-outlined text-2xl">psychology</span>
+                <span>Ami AIに質問</span>
             </button>
         </div>
-        
-        <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0b151b] rounded-2xl text-sm space-y-3 border border-[#3d5866] text-[#e1e3e5] font-mono">
-            <div id="ai-greeting-text" class="text-red-300 font-bold">大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？」</div>
+
+        <div id="youtube-device" style="pointer-events: none; z-index: 45;">
+            <div id="screen-study" class="w-full h-full p-5 flex flex-col bg-[#fcfbfa] overflow-hidden text-slate-800"></div>
+            <div id="screen-youtube" class="hidden w-full h-full bg-black flex flex-col">
+                <div class="p-3 flex items-center gap-1 bg-zinc-900">
+                    <span class="text-red-600 font-black text-base tracking-tighter">YouTube<span class="bg-red-600 text-white text-[9px] px-1 ml-1 rounded-sm">JP</span></span>
+                </div>
+                <div class="flex-grow flex items-center justify-center relative bg-zinc-800 overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-red-600 via-purple-600 to-blue-600 opacity-40 animate-pulse"></div>
+                    <div class="z-10 text-center">
+                        <div class="text-white font-black text-base italic tracking-wide">AMAZING OAMI DANCE</div>
+                    </div>
+                </div>
+                <div class="p-1.5 bg-zinc-900">
+                    <div class="h-1 w-full bg-white/20 rounded-full overflow-hidden">
+                        <div id="yt-progress" class="h-full bg-red-600" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="flex flex-col gap-3">
-            <div class="flex items-center gap-3">
-                <label class="w-12 h-12 m3-btn-tonal rounded-full cursor-pointer flex items-center justify-center text-[#bbe6ff] p-0">
-                    <span class="material-icons-outlined text-2xl">add_photo_alternate</span>
-                    <input type="file" id="ai-file-input" accept="image/*" class="hidden">
-                </label>
-                <div id="file-preview-name" class="text-xs text-[#bbe6ff] truncate italic hidden"></div>
-            </div>
-            <div class="flex items-center gap-2">
-                <input type="text" id="ai-text-input" placeholder="解けない問題をここに打ち込め..." class="flex-grow m3-input rounded-full text-sm px-5 h-12">
-                <button id="ai-send-btn" class="w-12 h-12 m3-btn-primary rounded-full flex items-center justify-center p-0">
-                    <span class="material-icons-outlined text-xl">send</span>
-                </button>
-            </div>
-        </div>
-    </div>
+        <div id="warning-vignette"></div>
 
-    <div id="pomodoro-screen" class="hidden fixed inset-0 bg-[#0b151b]/96 backdrop-blur-xl z-[400] flex flex-col items-center justify-center p-6">
-        <div class="text-center max-w-md w-full">
-            <div id="pomo-status-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8">
-                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME
-            </div>
-            <div id="pomo-clock" class="text-8xl font-thin font-mono text-slate-200 tracking-tight mb-12 select-none">25:00</div>
-            <div class="flex items-center justify-center gap-4 mb-16">
-                <button id="pomo-start-pause-btn" class="w-20 h-20 rounded-full bg-[#7cd4ff] text-[#003547] flex items-center justify-center shadow-xl transition-transform active:scale-95">
-                    <span id="pomo-ctrl-icon" class="material-icons-outlined text-3xl font-bold">play_arrow</span>
-                </button>
-                <button id="pomo-reset-btn" class="w-14 h-14 rounded-full bg-[#2f4a57] text-[#bbe6ff] flex items-center justify-center shadow-md transition-transform active:scale-95">
-                    <span class="material-icons-outlined text-xl">refresh</span>
-                </button>
-            </div>
-            <button id="pomo-close-btn" class="m3-btn-tonal text-sm px-8 py-3">
-                <span class="material-icons-outlined text-sm">visibility</span> 自習監視状況を覗く
-            </button>
-        </div>
-    </div>
-
-    <div id="settings-dialog" class="hidden absolute inset-0 bg-black/75 backdrop-blur-md z-[300] flex items-center justify-center p-6">
-        <div class="m3-dialog w-full max-w-lg p-8 flex flex-col max-h-[85vh] pointer-events-auto">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-2xl font-bold text-white flex items-center gap-2">
-                    <span class="material-icons-outlined text-[#7cd4ff] text-3xl">tune</span> 自習環境設定
-                </h2>
-                <button id="settings-close-btn" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-white">
+        <div id="ai-dock" class="ai-collapsed p-6 pointer-events-auto">
+            <div class="flex items-center justify-between pb-4 border-b border-[#3d5866] mb-4">
+                <div class="flex items-center gap-2">
+                    <div class="text-base font-bold text-white flex items-center gap-1.5">
+                        <span class="material-icons-outlined text-xl text-[#7cd4ff]">smart_toy</span> Ami AI
+                    </div>
+                    <span class="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full font-black tracking-wider uppercase shadow-sm">Beta</span>
+                </div>
+                <button id="ai-close-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-[#bbe6ff]">
                     <span class="material-icons-outlined text-2xl">close</span>
                 </button>
             </div>
+            
+            <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0b151b] rounded-2xl text-sm space-y-3 border border-[#3d5866] text-[#e1e3e5] font-mono">
+                <div id="ai-greeting-text" class="text-red-300 font-bold">大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？」</div>
+            </div>
 
-            <div class="flex-grow overflow-y-auto space-y-6 pr-2">
-                <div class="p-5 m3-card">
-                    <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">badge</span> 塾生ユーザー名登録</h3>
-                    <input type="text" id="user-nickname-input" placeholder="（未設定時は「お前」）" class="w-full m3-input text-sm">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <label class="w-12 h-12 m3-btn-tonal rounded-full cursor-pointer flex items-center justify-center text-[#bbe6ff] p-0">
+                        <span class="material-icons-outlined text-2xl">add_photo_alternate</span>
+                        <input type="file" id="ai-file-input" accept="image/*" class="hidden">
+                    </label>
+                    <div id="file-preview-name" class="text-xs text-[#bbe6ff] truncate italic hidden"></div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <input type="text" id="ai-text-input" placeholder="解けない問題をここに打ち込め..." class="flex-grow m3-input rounded-full text-sm px-5 h-12">
+                    <button id="ai-send-btn" class="w-12 h-12 m3-btn-primary rounded-full flex items-center justify-center p-0">
+                        <span class="material-icons-outlined text-xl">send</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pomodoro-screen" class="hidden absolute inset-0 bg-[#0b151b]/96 backdrop-blur-xl z-[400] flex flex-col items-center justify-center p-6">
+            <div class="text-center max-w-md w-full">
+                <div id="pomo-status-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME
+                </div>
+                <div id="pomo-clock" class="text-8xl font-thin font-mono text-slate-200 tracking-tight mb-12 select-none">25:00</div>
+                <div class="flex items-center justify-center gap-4 mb-16">
+                    <button id="pomo-start-pause-btn" class="w-20 h-20 rounded-full bg-[#7cd4ff] text-[#003547] flex items-center justify-center shadow-xl transition-transform active:scale-95">
+                        <span id="pomo-ctrl-icon" class="material-icons-outlined text-3xl font-bold">play_arrow</span>
+                    </button>
+                    <button id="pomo-reset-btn" class="w-14 h-14 rounded-full bg-[#2f4a57] text-[#bbe6ff] flex items-center justify-center shadow-md transition-transform active:scale-95">
+                        <span class="material-icons-outlined text-xl">refresh</span>
+                    </button>
+                </div>
+                <button id="pomo-close-btn" class="m3-btn-tonal text-sm px-8 py-3">
+                    <span class="material-icons-outlined text-sm">visibility</span> 自習監視状況を覗く
+                </button>
+            </div>
+        </div>
+
+        <div id="settings-dialog" class="hidden absolute inset-0 bg-black/75 backdrop-blur-md z-[300] flex items-center justify-center p-6">
+            <div class="m3-dialog w-full max-w-lg p-8 flex flex-col max-h-[85vh] pointer-events-auto">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <span class="material-icons-outlined text-[#7cd4ff] text-3xl">tune</span> 自習環境設定
+                    </h2>
+                    <button id="settings-close-btn" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-white">
+                        <span class="material-icons-outlined text-2xl">close</span>
+                    </button>
                 </div>
 
-                <div class="p-5 m3-card">
-                    <h3 class="text-base font-bold text-[#7cd4ff] mb-3 flex items-center gap-2"><span class="material-icons-outlined">av_timer</span> ポモドーロ時間カスタム</h3>
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <label class="block text-xs text-[#bbe6ff] mb-1">フォーカス（分）</label>
-                            <input type="number" id="timer-study-input" value="25" class="w-full m3-input">
-                        </div>
-                        <div>
-                            <label class="block text-xs text-[#bbe6ff] mb-1">休憩（分）</label>
-                            <input type="number" id="timer-break-input" value="5" class="w-full m3-input">
-                        </div>
+                <div class="flex-grow overflow-y-auto space-y-6 pr-2">
+                    <div class="p-5 m3-card">
+                        <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">badge</span> 塾生ユーザー名登録</h3>
+                        <input type="text" id="user-nickname-input" placeholder="（未設定時は「お前」）" class="w-full m3-input text-sm">
                     </div>
-                    <button id="save-settings-btn" class="w-full m3-btn-primary py-3 text-sm mt-4"><span class="material-icons-outlined text-sm">tune</span> 設定を保存・同期する</button>
-                </div>
 
-                <div class="p-5 m3-card">
-                    <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">campaign</span> 監視連動システムテスト</h3>
-                    <button id="test-notification-btn" class="w-full m3-btn-tonal py-3 text-sm"><span class="material-icons-outlined text-sm">notifications_active</span> テスト通知を送信する</button>
-                </div>
+                    <div class="p-5 m3-card">
+                        <h3 class="text-base font-bold text-[#7cd4ff] mb-3 flex items-center gap-2"><span class="material-icons-outlined">av_timer</span> ポモドーロ時間カスタム</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <label class="block text-xs text-[#bbe6ff] mb-1">フォーカス（分）</label>
+                                <input type="number" id="timer-study-input" value="25" class="w-full m3-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-[#bbe6ff] mb-1">休憩（分）</label>
+                                <input type="number" id="timer-break-input" value="5" class="w-full m3-input">
+                            </div>
+                        </div>
+                        <button id="save-settings-btn" class="w-full m3-btn-primary py-3 text-sm mt-4"><span class="material-icons-outlined text-sm">tune</span> 設定を保存・同期する</button>
+                    </div>
 
-                <div class="p-5 m3-card">
-                    <h3 class="text-base font-bold text-[#7cd4ff] mb-3 flex items-center gap-2"><span class="material-icons-outlined">menu_book</span> カモフラージュ画面選択</h3>
-                    <div class="space-y-2 text-sm text-[#e1e3e5]">
-                        <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
-                            <span>数学の教科書</span><input type="radio" name="camo-select" value="math" checked class="w-5 h-5 accent-[#7cd4ff]">
-                        </label>
-                        <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
-                            <span>スタサプ風映像授業</span><input type="radio" name="camo-select" value="studysapuri" class="w-5 h-5 accent-[#7cd4ff]">
-                        </label>
-                        <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
-                            <span>英語長文読解</span><input type="radio" name="camo-select" value="english" class="w-5 h-5 accent-[#7cd4ff]">
-                        </label>
-                        <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
-                            <span>国語（羅生門）</span><input type="radio" name="camo-select" value="japanese" class="w-5 h-5 accent-[#7cd4ff]">
-                        </label>
+                    <div class="p-5 m3-card">
+                        <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">campaign</span> 監視連動システムテスト</h3>
+                        <button id="test-notification-btn" class="w-full m3-btn-tonal py-3 text-sm"><span class="material-icons-outlined text-sm">notifications_active</span> テスト通知を送信する</button>
+                    </div>
+
+                    <div class="p-5 m3-card">
+                        <h3 class="text-base font-bold text-[#7cd4ff] mb-3 flex items-center gap-2"><span class="material-icons-outlined">menu_book</span> カモフラージュ画面選択</h3>
+                        <div class="space-y-2 text-sm text-[#e1e3e5]">
+                            <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
+                                <span>数学の教科書</span><input type="radio" name="camo-select" value="math" checked class="w-5 h-5 accent-[#7cd4ff]">
+                            </label>
+                            <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
+                                <span>スタサプ風映像授業</span><input type="radio" name="camo-select" value="studysapuri" class="w-5 h-5 accent-[#7cd4ff]">
+                            </label>
+                            <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
+                                <span>英語長文読解</span><input type="radio" name="camo-select" value="english" class="w-5 h-5 accent-[#7cd4ff]">
+                            </label>
+                            <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
+                                <span>国語（羅生門）</span><input type="radio" name="camo-select" value="japanese" class="w-5 h-5 accent-[#7cd4ff]">
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div id="start-screen" class="m3-overlay-screen">
-        <div class="boot-scanline"></div>
-        <div id="boot-content" class="flex flex-col items-center justify-center transition-all duration-500 opacity-0 transform scale-95 w-full max-w-lg">
-            <div id="boot-emoji" class="text-9xl mb-6 select-none pulse-sensei">👨‍🦲</div>
-            <h1 id="boot-title" class="glitch-title">OAMI SURVIVAL</h1>
-            <p id="boot-sub" class="scary-sub mb-8 text-base max-w-md leading-relaxed">目を離せば大網先生の怒りが蓄積される。<br>逃げ場のないリアル自習空間へようこそ...</p>
-        </div>
-        
-        <div id="boot-log-container">
-            <div id="boot-log-text"></div>
-        </div>
+        <div id="start-screen" class="m3-overlay-screen">
+            <div class="boot-scanline"></div>
+            <div id="boot-content" class="flex flex-col items-center justify-center transition-all duration-500 opacity-0 transform scale-95 w-full max-w-lg">
+                <div id="boot-emoji" class="text-9xl mb-6 select-none pulse-sensei">👨‍🦲</div>
+                <h1 id="boot-title" class="glitch-title">OAMI SURVIVAL</h1>
+                <p id="boot-sub" class="scary-sub mb-8 text-base max-w-md leading-relaxed">目を離せば大網先生の怒りが蓄積される。<br>逃げ場のないリアル自習空間へようこそ...</p>
+            </div>
+            
+            <div id="boot-log-container">
+                <div id="boot-log-text"></div>
+            </div>
 
-        <div id="boot-actions" class="flex flex-col items-center gap-4 w-full max-w-sm z-[520] hidden opacity-0 transition-all duration-500">
-            <button id="auth-btn" class="w-full m3-btn-tonal pointer-events-auto"><span class="material-icons-outlined">notifications_active</span>監視システム連動（必須認証）</button>
-            <button id="start-btn" class="w-full m3-btn-primary" disabled><span class="material-icons-outlined">login</span>覚悟を決めて入室する</button>
+            <div id="boot-actions" class="flex flex-col items-center gap-4 w-full max-w-sm z-[520] hidden opacity-0 transition-all duration-500">
+                <button id="auth-btn" class="w-full m3-btn-tonal pointer-events-auto"><span class="material-icons-outlined">notifications_active</span>監視システム連動（必須認証）</button>
+                <button id="start-btn" class="w-full m3-btn-primary" disabled><span class="material-icons-outlined">login</span>覚悟を決めて入室する</button>
+            </div>
         </div>
     </div>
 
@@ -319,7 +331,7 @@
         const GEMINI_API_KEY = "AIzaSyA9eQLOWdnG7PQxVOd9c8-htnxhSqbvP6w";
         let initialCamo = "math";
 
-        // --- 🔊 Web Audio API リアルタイム効果音生成システム (安定化強化) ---
+        // --- 🔊 Web Audio API リアルタイム効果音生成システム ---
         let audioCtx = null;
         function initAudio() {
             if (!audioCtx) {
@@ -461,11 +473,8 @@
                             content.classList.remove('opacity-0', 'scale-95');
                             content.classList.add('opacity-1', 'scale-100');
                             
-                            // ログ終了後に初めて起動ボタンをフェードイン表示
                             actions.classList.remove('hidden');
-                            setTimeout(() => {
-                                actions.classList.remove('opacity-0');
-                            }, 50);
+                            setTimeout(() => { actions.classList.remove('opacity-0'); }, 50);
 
                             if (Notification.permission === 'granted') activateStartButton();
                         }, 300);
@@ -582,7 +591,7 @@
             math: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400 flex items-center gap-0.5"><span class="material-icons-outlined text-sm">functions</span> Advanced Mathematics</span></div><div class="space-y-2 text-slate-600"><div class="h-2 w-full bg-slate-200 rounded"></div><div class="my-3 p-4 bg-slate-100 border rounded text-center font-serif text-slate-600 italic text-sm">f(x) = ∫[a,b] sin(x²) dx + cos(y)dy</div></div>`,
             studysapuri: `<div class="w-full h-full flex flex-col bg-slate-950 text-white p-0"><div class="bg-slate-900 px-4 py-2 flex items-center gap-2 text-xs font-bold border-b border-slate-800"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div><span>第4講 英文法の極意（特別配信）</span></div><div class="flex-grow flex bg-slate-900 items-center justify-center text-center font-bold text-cyan-400 text-sm animate-pulse">[ 講師：大網先生特選ゼミ ]</div></div>`,
             english: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400">English Advanced Reading</span></div><div class="space-y-3 text-xs text-slate-700 font-serif"><p class="font-bold text-sm">The Paradigm Shift in Modern Education.</p><p>It is universally acknowledged that a dedicated, strict instructor fosters an unmatched environment...</p></div>`,
-            japanese: `<div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-3 font-serif"><div class="text-[10px] text-slate-400 border-b border-orange-200 pb-1 mb-2 flex justify-between"><span>芥川龍之介「羅生門」第一章</span></div><div class="flex flex-row-reverse justify-start h-full text-right"><p class="vertical-text text-sm leading-loose tracking-wide">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。</p></div></div>`
+            japanese: `<div class="w-full h-full flex flex-col bg-[#faf6ee] text-[#2b2b2b] p-3 font-serif"><div class="text-[10px] text-slate-400 border-b border-orange-200 pb-1 mb-2 flex justify-between"><span>芥川羅生門「第一章」</span></div><div class="flex flex-row-reverse justify-start h-full text-right"><p class="vertical-text text-sm leading-loose tracking-wide">ある日の暮方の事である。一人の下人が、羅生門の暮方を待っていた。</p></div></div>`
         };
         function setCamoScreen(type) {
             const container = document.getElementById('screen-study');
@@ -642,14 +651,11 @@
             systemMsgHtml.innerText = "大網先生が答案の不備を精責中..."; chatLog.appendChild(systemMsgHtml);
             chatLog.scrollTop = chatLog.scrollHeight;
 
-            let parts = [{ text: `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（名前:${userName}）からの質問に徹底的に解説しつつ、適度にお説教を織り交ぜて回答してください。\n質問: ${textInput || "添付した画像を確認しろ"}` }];
-            if (selectedBase64Image) parts.unshift({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
-
-            // 安定化：リクエスト直前に値をローカルに退避させ、フォーム側は即初期化
-            const imageToSend = selectedBase64Image;
-            selectedBase64Image = null;
-            document.getElementById('ai-file-input').value = ""; // 👈 2回目エラーバグの主犯を検挙・リセット
-            document.getElementById('file-preview-name').classList.add('hidden');
+            // 🛠️ APIバグ完全対策：画像データを格納した配列を直前まで完全に保持させる
+            let parts = [{ text: `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（名前:${userName}）からの質問に徹底的に数式や内容を解説しつつ、適度にお説教を織り交ぜて回答してください。\n質問: ${textInput || "添付した画像を確認しろ"}` }];
+            if (selectedBase64Image) {
+                parts.unshift({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
+            }
 
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -657,6 +663,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ contents: [{ parts: parts }] })
                 });
+                
+                // 🛠️ リセット処理はfetchのbody生成が終わった「このタイミング」で行うのが正解！
+                selectedBase64Image = null;
+                document.getElementById('ai-file-input').value = "";
+                document.getElementById('file-preview-name').classList.add('hidden');
+
                 if (!response.ok) throw new Error("API Error");
                 const data = await response.json();
                 const replyText = data.candidates[0].content.parts[0].text;
@@ -665,6 +677,11 @@
                 systemMsgHtml.className = "text-red-300 font-bold mb-2";
                 typeWriterEffect(systemMsgHtml, `大網先生「${replyText}`);
             } catch (err) {
+                // エラー時も安全のためにファイルバッファをリセット
+                selectedBase64Image = null;
+                document.getElementById('ai-file-input').value = "";
+                document.getElementById('file-preview-name').classList.add('hidden');
+                
                 systemMsgHtml.classList.remove('animate-pulse');
                 systemMsgHtml.className = "text-amber-400 mb-2"; 
                 systemMsgHtml.innerText = "大網先生「通信エラーだ！キーが間違っているか、記述に不備があるぞ！」";
@@ -767,7 +784,7 @@
             renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" }); 
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
-            document.body.appendChild(renderer.domElement);
+            document.getElementById('app-viewport-wrapper').appendChild(renderer.domElement);
             
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.85); scene.add(ambientLight);
             const directionalLight = new THREE.DirectionalLight(0xfff3e0, 0.5); directionalLight.position.set(5, 12, 5); scene.add(directionalLight);
@@ -836,7 +853,9 @@
             setCamoScreen(initialCamo);
             const savedName = localStorage.getItem('userNickname');
             if (savedName) document.getElementById('user-nickname-input').value = savedName;
-            updatePomoClockUI();
+            
+            // iPadOSのビューポートサイズ同期を初期化時に実行
+            syncViewportHeight();
 
             const startAction = (e) => {
                 if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger') || e.target.closest('#pomodoro-toggle-btn') || e.target.closest('#pomodoro-screen')) return;
@@ -958,26 +977,38 @@
             Notification.requestPermission().then(p => { if(p==='granted') activateStartButton(); }); 
         };
         
-        // 🛠️ iPadの画面サイズリサイズと、キーボードによるVisual Viewport変動の同時バグ対策
-        function handleResize() {
-            const width = window.innerWidth;
-            const height = window.innerHeight;
-            camera.aspect = width / height; 
-            camera.updateProjectionMatrix(); 
-            renderer.setSize(width, height); 
+        // 🛠️ iPadのソフトウェアキーボードによる「高低差・下部余白バグ」を完全に無効化する最強ロジック
+        function syncViewportHeight() {
+            const wrapper = document.getElementById('app-viewport-wrapper');
+            if (!wrapper) return;
 
-            // キーボード表示時に全体がずり上がるのを防ぐため、強制的に(0,0)に固定
+            if (window.visualViewport) {
+                // キーボードの有無に関わらず、今目に見えている「真の表示領域」のサイズを px で直撃上書き
+                const vvHeight = window.visualViewport.height;
+                const vvWidth = window.visualViewport.width;
+
+                wrapper.style.height = `${vvHeight}px`;
+                wrapper.style.width = `${vvWidth}px`;
+                document.body.style.height = `${vvHeight}px`;
+
+                // Three.js側のカメラと解像度も、この「真のサイズ」にぴったり追従させる
+                if (camera && renderer) {
+                    camera.aspect = vvWidth / vvHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(vvWidth, vvHeight);
+                }
+            } else {
+                const wHeight = window.innerHeight;
+                wrapper.style.height = `${wHeight}px`;
+                document.body.style.height = `${wHeight}px`;
+            }
+            // iPadOSのスクロール跳ね返り現象を封印
             window.scrollTo(0, 0);
         }
 
-        window.addEventListener('resize', handleResize);
+        window.addEventListener('resize', syncViewportHeight);
         if (window.visualViewport) {
-            // iPadOSのソフトウェアキーボード出現に伴う高低差のズレを中和する
-            window.visualViewport.addEventListener('resize', () => {
-                window.scrollTo(0, 0);
-                document.body.style.top = "0px";
-                document.body.style.height = "100vh";
-            });
+            window.visualViewport.addEventListener('resize', syncViewportHeight);
             window.visualViewport.addEventListener('scroll', () => window.scrollTo(0, 0));
         }
         window.onload = init3D;
