@@ -25,7 +25,6 @@
             background: #050b0d; 
             width: 100vw; 
             height: 100vh;
-            /* iOSの底面バーの干渉を防ぐ最新の動的ビューポート高 */
             height: 100dvh; 
             position: fixed;
             top: 0;
@@ -36,7 +35,7 @@
             user-select: none;
             font-family: 'Roboto', 'Noto Sans JP', sans-serif;
             box-sizing: border-box;
-            padding-bottom: env(safe-area-inset-bottom); /* PWA化の際の余白対策 */
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; height: 100dvh; }
@@ -55,12 +54,12 @@
         .m3-btn-icon:hover { background: #2a3f48; }
         .m3-input { background: #081014; border: 1px solid #717d84; color: #e1e3e5; border-radius: 12px; padding: 12px 16px; transition: all 0.2s; pointer-events: auto; }
         
-        /* カモフラージュスマホデバイス（位置調整） */
+        /* カモフラージュスマホデバイス */
         #youtube-device { position: absolute; bottom: 25%; left: 50%; transform: translateX(-50%); width: 440px; height: 250px; border-radius: 36px; overflow: hidden; border: 12px solid #0f1b21; background: #fff; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .active-view { transform: translateX(-50%) translateY(-30px) scale(1.05); }
         #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 20%, rgba(255, 50, 50, 0.5) 100%); opacity: 0; transition: opacity 0.15s; z-index: 40; }
         
-        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100h; height: 100dvh; background: #04080a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
+        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; height: 100dvh; background: #04080a; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
         
         #gemini-ai-trigger {
             position: absolute; bottom: 40px; right: 40px; height: 64px; padding: 0 28px; border-radius: 32px;
@@ -82,11 +81,12 @@
         .ai-collapsed { transform: translateX(420px); }
         .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
 
-        #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 13px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 120px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.5); padding: 12px; border-radius: 8px; border: 1px solid rgba(124, 212, 255, 0.2); }
-        .glitch-title { font-size: 3.5rem; font-weight: 900; font-style: italic; letter-spacing: -1px; color: #ffffff; text-shadow: 0 0 12px rgba(124,212,255,0.4); display: none; margin-bottom: 8px; }
+        /* ログコンテナの不透明度とトランジションをより安定化 */
+        #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 13px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 120px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.6); padding: 12px; border-radius: 8px; border: 1px solid rgba(124, 212, 255, 0.2); transition: opacity 0.3s ease; opacity: 1; }
+        .glitch-title { font-size: 3.5rem; font-weight: 900; font-style: italic; letter-spacing: -1px; color: #ffffff; text-shadow: 0 0 12px rgba(124,212,255,0.4); margin-bottom: 8px; }
         .boot-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%); background-size: 100% 4px; z-index: 510; pointer-events: none; }
-        .pulse-alert { animation: redAlertEffect 0.5s ease-out 2; }
-        @keyframes redAlertEffect { 0% { background-color: #050b0d; } 50% { background-color: #380d11; } 100% { background-color: #050b0d; } }
+        .pulse-alert { animation: redAlertEffect 0.5s ease-out 1; }
+        @keyframes redAlertEffect { 0% { background-color: #050b0d; } 50% { background-color: #1e080a; } 100% { background-color: #050b0d; } }
     </style>
 </head>
 <body>
@@ -250,29 +250,31 @@
 
     <div id="start-screen" class="m3-overlay-screen">
         <div class="boot-scanline"></div>
-        <div id="boot-emoji" class="text-9xl mb-6 select-none opacity-0 transition-opacity duration-1000">👨‍🦲</div>
-        <h1 id="boot-title" class="glitch-title">OAMI SURVIVAL</h1>
-        <p id="boot-sub" class="text-[#bbe6ff] mb-8 text-base max-w-md leading-relaxed opacity-0 transition-opacity duration-1000">目を離せば大網先生の怒りが蓄積される。<br>最新鋭のリアルな自習空間へようこそ。</p>
+        <div id="boot-content" class="flex flex-col items-center justify-center transition-all duration-500 opacity-1 w-full max-w-lg">
+            <div id="boot-emoji" class="text-9xl mb-6 select-none">👨‍🦲</div>
+            <h1 id="boot-title" class="glitch-title">OAMI SURVIVAL</h1>
+            <p id="boot-sub" class="text-[#bbe6ff] mb-8 text-base max-w-md leading-relaxed">目を離せば大網先生の怒りが蓄積される。<br>最新鋭のリアルな自習空間へようこそ。</p>
+        </div>
         
         <div id="boot-log-container">
             <div id="boot-log-text"></div>
         </div>
 
-        <div id="boot-actions" class="flex flex-col items-center gap-4 w-full max-w-sm opacity-0 transition-opacity duration-700 pointer-events-none">
-            <button id="auth-btn" class="w-full m3-btn-tonal"><span class="material-icons-outlined">notifications_active</span>監視連動システム起動（通知許可）</button>
-            <button id="start-btn" class="w-full m3-btn-primary opacity-40" disabled><span class="material-icons-outlined">login</span>自習室に入室する</button>
+        <div id="boot-actions" class="flex flex-col items-center gap-4 w-full max-w-sm z-[520]">
+            <button id="auth-btn" class="w-full m3-btn-tonal pointer-events-auto"><span class="material-icons-outlined">notifications_active</span>監視連動システム起動（通知許可）</button>
+            <button id="start-btn" class="w-full m3-btn-primary opacity-40 pointer-events-none" disabled><span class="material-icons-outlined">login</span>自習室に入室する</button>
         </div>
     </div>
 
     <script>
         const GEMINI_API_KEY = "AIzaSyAorKSTtiQBjrzf556ZaiW_7bmqKHJKGmo";
+        let initialCamo = "math";
 
         function getUserName() {
             const savedName = localStorage.getItem('userNickname');
             return savedName && savedName.trim() !== "" ? savedName.trim() : "お前";
         }
 
-        // 📡 Service Worker 登録確認
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
@@ -281,7 +283,6 @@
             });
         }
 
-        // iPadでのダブルタップによるズーム無効化ロジック
         let lastTouchEnd = 0;
         document.documentElement.addEventListener('touchend', (event) => {
             const now = (new Date()).getTime();
@@ -299,9 +300,15 @@
             "READY TO INITIATE INTENSE STUDY ENVIRONMENT."
         ];
 
+        // 🛠️ 【超重要】詰まりバグを完全に破壊した新・起動シーケンス
         function runBootSequence() {
             const container = document.getElementById('start-screen');
             const logBox = document.getElementById('boot-log-text');
+            const logContainer = document.getElementById('boot-log-container');
+            const content = document.getElementById('boot-content');
+            
+            // 初期の表示不整合を防ぐため、強制的にコンテツを非表示にしてログを開始
+            content.style.opacity = "0";
             container.classList.add('pulse-alert');
 
             let lineIndex = 0;
@@ -311,31 +318,35 @@
                     line.className = "mb-1 text-xs font-mono tracking-wider";
                     line.innerText = `> ${logLines[lineIndex]}`;
                     logBox.appendChild(line);
-                    document.getElementById('boot-log-container').scrollTop = document.getElementById('boot-log-container').scrollHeight;
+                    logContainer.scrollTop = logContainer.scrollHeight;
                     lineIndex++;
-                    setTimeout(printLine, 100);
+                    setTimeout(printLine, 80);
                 } else {
+                    // 全ログ出力後、確実にログ枠を非表示にしてメインUIを浮き上がらせる
                     setTimeout(() => {
-                        document.getElementById('boot-log-container').style.display = 'none';
-                        document.getElementById('boot-emoji').classList.remove('opacity-0');
-                        const title = document.getElementById('boot-title');
-                        title.style.display = 'block';
-                        
-                        let f = 0;
-                        const interval = setInterval(() => {
-                            title.style.opacity = (f % 2 === 0) ? '0.3' : '1';
-                            if(f++ > 5) {
-                                clearInterval(interval);
-                                title.style.opacity = '1';
-                                document.getElementById('boot-sub').classList.remove('opacity-0');
-                                const actions = document.getElementById('boot-actions');
-                                actions.classList.remove('opacity-0', 'pointer-events-none');
+                        logContainer.style.opacity = "0";
+                        setTimeout(() => {
+                            logContainer.style.display = 'none';
+                            content.style.opacity = "1";
+                            // 通知許可がすでに下りている場合は、最初から入室ボタンを活性化させる親切設計
+                            if (Notification.permission === 'granted') {
+                                activateStartButton();
                             }
-                        }, 50);
+                        }, 300);
                     }, 200);
                 }
             }
-            setTimeout(printLine, 200);
+            setTimeout(printLine, 100);
+        }
+
+        function activateStartButton() {
+            const authBtn = document.getElementById('auth-btn');
+            const startBtn = document.getElementById('start-btn');
+            if(authBtn) authBtn.style.display = 'none';
+            if(startBtn) {
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-40', 'pointer-events-none');
+            }
         }
 
         // ポモドーロタイマーロジック
@@ -404,7 +415,6 @@
             updatePomoClockUI();
         };
 
-        // 🔔 プッシュ通知コアシステム
         function triggerPushNotification(title, body) {
             if (Notification.permission === 'granted' && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.ready.then(registration => {
@@ -425,7 +435,6 @@
             triggerPushNotification('🔥 大網先生の常時監視テスト', `「おい${userName}！通知テスト完了だ。サボったら即座に雷を落とすからな！」`);
         };
 
-        // アプリ放置時間連動システム
         let offlineAngerCount = parseInt(localStorage.getItem('offlineAnger')) || 0;
         function updateAngerBadge(count) {
             if ('setAppBadge' in navigator) {
@@ -458,7 +467,6 @@
 
         window.addEventListener('blur', () => { localStorage.setItem('lastActiveTime', Date.now().toString()); });
 
-        // カモフラ画像表示用テンプレート
         const camoTemplates = {
             math: `<div class="flex justify-between items-center border-b pb-1 mb-2"><span class="text-xs font-bold text-slate-400 flex items-center gap-0.5"><span class="material-icons-outlined text-sm">functions</span> Advanced Mathematics</span></div><div class="space-y-2 text-slate-600"><div class="h-2 w-full bg-slate-200 rounded"></div><div class="my-3 p-4 bg-slate-100 border rounded text-center font-serif text-slate-600 italic text-sm">f(x) = ∫[a,b] sin(x²) dx + cos(y)dy</div></div>`,
             studysapuri: `<div class="w-full h-full flex flex-col bg-slate-950 text-white p-0"><div class="bg-slate-900 px-4 py-2 flex items-center gap-2 text-xs font-bold border-b border-slate-800"><div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div><span>第4講 英文法の極意（特別配信）</span></div><div class="flex-grow flex bg-slate-900 items-center justify-center text-center font-bold text-cyan-400 text-sm animate-pulse">[ 講師：大網先生特選ゼミ ]</div></div>`,
@@ -541,6 +549,10 @@
             selectedBase64Image = null; document.getElementById('file-preview-name').classList.add('hidden');
         };
 
+        // 設定の開閉
+        document.getElementById('settings-toggle-btn').onclick = (e) => { e.stopPropagation(); document.getElementById('settings-dialog').classList.remove('hidden'); };
+        document.getElementById('settings-close-btn').onclick = () => { document.getElementById('settings-dialog').classList.add('hidden'); };
+
         document.getElementById('save-settings-btn').onclick = () => {
             const inputName = document.getElementById('user-nickname-input').value.trim();
             localStorage.setItem('userNickname', inputName);
@@ -552,7 +564,7 @@
             document.getElementById('settings-dialog').classList.add('hidden');
         };
 
-        // --- 🎓 Three.js 3Dグラフィックス空間（大網先生・絶対定着＆超リアル化版） ---
+        // --- 🎓 Three.js 3Dグラフィックス空間 ---
         let scene, camera, renderer, sensei;
         let students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
@@ -567,7 +579,6 @@
             return new THREE.CanvasTexture(canvas);
         }
 
-        // 人物3Dアセット生成（原点座標を足元に完全統一してロストを防御）
         function createDetailedPerson(isSensei = false) {
             const group = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.5 });
@@ -575,7 +586,6 @@
                 new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.5 }) : 
                 new THREE.MeshStandardMaterial({ map: createPatternTexture('checked', `hsl(${Math.random()*360}, 50%, 40%)`, '#222'), roughness: 0.7 });
 
-            // 体（トルソー）
             const torso = new THREE.Group();
             const chest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.35), clothMat); chest.position.y = 1.25;
             const waist = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.3), new THREE.MeshStandardMaterial({color:0x111111})); waist.position.y = 0.9;
@@ -588,14 +598,12 @@
             }
             group.add(torso);
 
-            // 腕
             group.armL = new THREE.Group(); group.armR = new THREE.Group();
             const upperArm = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.45, 0.16), clothMat); upperArm.position.y = -0.22;
             group.armL.add(upperArm.clone()); group.armL.position.set(-0.38, 1.4, 0);
             group.armR.add(upperArm.clone()); group.armR.position.set(0.38, 1.4, 0);
             group.add(group.armL, group.armR);
 
-            // 足
             const pantL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.6, 0.2), new THREE.MeshStandardMaterial({ color: 0x111111 })); pantL.position.y = -0.3;
             group.legL = new THREE.Group(); group.legL.add(pantL); group.legL.position.set(-0.15, 0.75, 0);
             
@@ -603,12 +611,10 @@
             group.legR = new THREE.Group(); group.legR.add(pantR); group.legR.position.set(0.15, 0.75, 0);
             group.add(group.legL, group.legR);
 
-            // 頭部
             const headGroup = new THREE.Group();
             const skull = new THREE.Mesh(new THREE.SphereGeometry(0.23, 32, 32), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
             
             if (isSensei) {
-                // 大網先生専用の威圧的な眼鏡と髭、目を追加
                 const eyeGeo = new THREE.SphereGeometry(0.03, 16, 16); 
                 const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
                 const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.08, 0.04, 0.2);
@@ -616,7 +622,6 @@
                 headGroup.add(eL, eR);
                 group.eyes = [eL, eR];
 
-                // 黒縁メガネの表現
                 const glassFrame = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.06, 0.03), new THREE.MeshStandardMaterial({color:0x000000, roughness:0.2}));
                 glassFrame.position.set(0, 0.04, 0.21); headGroup.add(glassFrame);
             } else {
@@ -631,9 +636,8 @@
         function init3D() {
             scene = new THREE.Scene(); 
             scene.background = new THREE.Color(0x0a1216); 
-            scene.fog = new THREE.FogExp2(0x0a1216, 0.04); // 奥行きのあるリアルな空気感
+            scene.fog = new THREE.FogExp2(0x0a1216, 0.04);
 
-            // カメラ位置を少し手前に引き、視野角(FOV)を最適化して先生を確実にとらえる
             camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 100); 
             camera.position.set(0, 2.3, 6.5); 
             camera.lookAt(0, 1.3, -2);
@@ -643,48 +647,36 @@
             renderer.shadowMap.enabled = true;
             document.body.appendChild(renderer.domElement);
             
-            // --- 💡 リアリティ追求型のライティング ---
             const ambientLight = new THREE.AmbientLight(0x223344, 0.6); scene.add(ambientLight);
-            
-            // 廊下や窓側から差し込む月光風スポットライト（ホラーでリアルな塾の夜間自習室を演出）
             const moonLight = new THREE.DirectionalLight(0x7cd4ff, 0.8); moonLight.position.set(-15, 20, 5); scene.add(moonLight);
-            
-            // 教壇（黒板）を照らす蛍光灯ダウンライト
             const roomLight = new THREE.PointLight(0xfff5ea, 0.9, 30); roomLight.position.set(0, 5, -4); scene.add(roomLight);
 
-            // リアルな黒板
             const blackboard = new THREE.Mesh(new THREE.BoxGeometry(10, 3.2, 0.1), new THREE.MeshStandardMaterial({ color: 0x0f2a1d, roughness: 0.9 })); 
             blackboard.position.set(0, 2.6, -11.5); scene.add(blackboard);
 
-            // 教壇ステージ（段差）
             const platform = new THREE.Mesh(new THREE.BoxGeometry(11, 0.25, 3), new THREE.MeshStandardMaterial({ color: 0x47311b, roughness: 0.7 }));
             platform.position.set(0, 0.125, -10); scene.add(platform);
 
-            // 床（ウッドタイル調テクスチャ表現）
             const floorCanvas = document.createElement('canvas'); floorCanvas.width = 128; floorCanvas.height = 128;
             const fCtx = floorCanvas.getContext('2d'); fCtx.fillStyle = '#3a271d'; fCtx.fillRect(0,0,128,128); fCtx.fillStyle = '#261912';
             for(let i=0; i<128; i+=16) { fCtx.fillRect(i, 0, 1, 128); fCtx.fillRect(0, i, 128, 1); }
             const floorTex = new THREE.CanvasTexture(floorCanvas); floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(16,16);
             const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.6 })); floor.rotation.x = -Math.PI / 2; scene.add(floor);
 
-            // 左右のリアルな教室の壁
             const wallMat = new THREE.MeshStandardMaterial({ color: 0x222e35, roughness: 0.8 });
             const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), wallMat); leftWall.position.set(-8, 3.5, -5); leftWall.rotation.y = Math.PI/2; scene.add(leftWall);
             const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 15), wallMat); rightWall.position.set(8, 3.5, -5); rightWall.rotation.y = -Math.PI/2; scene.add(rightWall);
 
-            // 机・椅子・生徒の配置（プレイヤーの周りを囲んで密集感を出す）
             const deskMat = new THREE.MeshStandardMaterial({ color: 0x6e4726, roughness: 0.6 });
             const legMat = new THREE.MeshStandardMaterial({ color: 0x2c3539, metalness: 0.4 });
-            const noteMat = new THREE.MeshStandardMaterial({ color: 0xedf2f7 }); // 机の上のノート用
+            const noteMat = new THREE.MeshStandardMaterial({ color: 0xedf2f7 });
             
             for (let x = -5; x <= 5; x += 2.5) {
                 for (let z = -8; z <= 2; z += 3.2) {
-                    if (Math.abs(x) < 0.5 && z > 1.5) continue; // プレイヤーの目の前は空ける
+                    if (Math.abs(x) < 0.5 && z > 1.5) continue;
 
                     const deskGroup = new THREE.Group();
                     const top = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.06, 1.0), deskMat); top.position.y = 0.85; deskGroup.add(top);
-                    
-                    // リアリティ補強：机の上の白い参考書・ノート
                     const note = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.01, 0.25), noteMat); note.position.set(0.1, 0.88, 0); note.rotation.y = 0.1; deskGroup.add(note);
 
                     const legGeo = new THREE.BoxGeometry(0.04, 0.85, 0.04);
@@ -695,20 +687,17 @@
                     
                     deskGroup.position.set(x, 0, z); scene.add(deskGroup);
                     
-                    // 他の自習生徒たち
                     if (Math.abs(x) > 0.5 || z < -1) {
                         const s = createDetailedPerson(false); 
                         s.position.set(x, 0, z + 0.8); 
                         s.rotation.y = Math.PI; 
-                        s.head.rotation.x = 0.4; // みんな下を向いて猛勉強中
+                        s.head.rotation.x = 0.4;
                         scene.add(s); 
                         students.push(s);
                     }
                 }
             }
 
-            // 👑 【大網先生：完全出現ロジック】
-            // 教壇（段差の上）に絶対にめり込まないようY座標を「0.25（段の高さ）」に設定し、カメラが必ず捉える位置に初期固定。
             sensei = createDetailedPerson(true); 
             sensei.position.set(0, 0.25, -10); 
             scene.add(sensei);
@@ -718,7 +707,6 @@
             if (savedName) document.getElementById('user-nickname-input').value = savedName;
             updatePomoClockUI();
 
-            // 操作インプット（マルチデバイス対応）
             const startAction = (e) => {
                 if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger') || e.target.closest('#pomodoro-toggle-btn') || e.target.closest('#pomodoro-screen')) return;
                 isWatching = true; document.getElementById('screen-study').classList.add('hidden'); document.getElementById('screen-youtube').classList.remove('hidden'); document.getElementById('youtube-device').classList.add('active-view');
@@ -733,13 +721,11 @@
             runBootSequence(); animate();
         }
 
-        // 大網先生の高精度AI・アニメーション処理
         function updateAI() {
             if (!sensei) return;
             const time = Date.now() * 0.004; aiTimer -= 1;
             
             if (aiState === 'WALK') {
-                // 教壇（段差の上）を左右に鋭く行き来するリアルな巡回挙動
                 let dist = sensei.position.distanceTo(aiTarget);
                 if (dist > 0.3) {
                     let dir = aiTarget.clone().sub(sensei.position).normalize();
@@ -751,17 +737,14 @@
                     aiTimer = 60 + Math.random() * 80; 
                 }
             } else if (aiState === 'INSPECT') {
-                // 立ち止まり、鋭い眼光で生徒たち（プレイヤー側）をギロリと見渡す
                 sensei.legL.rotation.x = 0; sensei.legR.rotation.x = 0;
                 sensei.head.rotation.y = Math.sin(time * 0.5) * 0.8;
                 if (aiTimer <= 0) { 
                     aiState = 'WALK'; 
-                    // 教壇の範囲内（X軸:-4〜4, Z軸:-10のライン上）で歩くターゲットを再設定
                     aiTarget.set((Math.random() - 0.5) * 8, 0.25, -10 + (Math.random() - 0.5) * 1); 
                 }
             }
 
-            // プレイヤー（カメラ位置付近）への視線判定
             const playerPos = new THREE.Vector3(0, 0, 4);
             const dist = sensei.position.distanceTo(playerPos);
             const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(sensei.head.getWorldQuaternion(new THREE.Quaternion()));
@@ -771,12 +754,11 @@
                 score += 1; document.getElementById('score-text').innerText = score.toString().padStart(4, '0');
                 document.getElementById('yt-progress').style.width = (score % 100) + "%";
                 
-                // 先生がこちらを向いている（dot値が高い）時にスマホを見ていると、不審度が爆速で上昇
                 if (dot > 0.2 && dist < 18) {
                     suspicion += 2.5; 
                     document.getElementById('warning-vignette').style.opacity = "1";
-                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.setHex(0xff0000)); // 目を赤く光らせて威嚇
-                    sensei.head.rotation.x = -0.1; // プレイヤーを凝視
+                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.setHex(0xff0000));
+                    sensei.head.rotation.x = -0.1;
                 } else {
                     suspicion = Math.max(0, suspicion - 0.5); 
                     document.getElementById('warning-vignette').style.opacity = "0";
@@ -799,14 +781,23 @@
             const userName = getUserName();
             const startScreen = document.getElementById('start-screen');
             startScreen.style.display = 'flex';
+            document.getElementById('boot-content').style.opacity = "1";
             document.getElementById('boot-title').innerText = "DISMISSED";
             document.getElementById('boot-sub').innerHTML = `<span class='text-red-500 font-black text-3xl'>Score: ${score}</span><br><br>大網先生「...おい${userName}、ペンが完全に止まっているぞ。荷物をまとめて今すぐ出ていけ！」`;
-            document.getElementById('start-btn').innerHTML = `<span class="material-icons-outlined">refresh</span>反省して再入室`; 
+            
+            const startBtn = document.getElementById('start-btn');
+            startBtn.innerHTML = `<span class="material-icons-outlined">refresh</span>反省して再入室`; 
+            startBtn.disabled = false;
+            startBtn.classList.remove('opacity-40', 'pointer-events-none');
+            
+            const authBtn = document.getElementById('auth-btn');
+            if (authBtn) authBtn.style.display = 'none';
+
             isWatching = false;
         }
 
         document.getElementById('start-btn').onclick = () => { score = 0; suspicion = 0; gameActive = true; document.getElementById('start-screen').style.display = 'none'; };
-        document.getElementById('auth-btn').onclick = function() { Notification.requestPermission().then(p => { if(p==='granted') { document.getElementById('start-btn').disabled=false; document.getElementById('start-btn').classList.remove('opacity-40'); this.style.display='none'; } }); };
+        document.getElementById('auth-btn').onclick = function() { Notification.requestPermission().then(p => { if(p==='granted') { activateStartButton(); } }); };
         window.onresize = () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
         window.onload = init3D;
     </script>
