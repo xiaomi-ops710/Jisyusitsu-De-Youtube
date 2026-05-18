@@ -262,6 +262,20 @@
             return savedName && savedName.trim() !== "" ? savedName.trim() : "お前";
         }
 
+        // --- 🤖 プッシュ通知の確実な動作用 Service Worker インライン登録システム ---
+        if ('serviceWorker' in navigator) {
+            const swBlob = new Blob([`
+                self.addEventListener('notificationclick', function(event) {
+                    event.notification.close();
+                    event.waitUntil(clients.openWindow(event.notification.data || '/'));
+                });
+            `], { type: 'application/javascript' });
+            const swUrl = URL.createObjectURL(swBlob);
+            navigator.serviceWorker.register(swUrl).then(reg => {
+                console.log("Service Worker Successfully Injected for Notifications.");
+            }).catch(err => console.log("SW Register Fail:", err));
+        }
+
         // --- 起動アニメーション演出システム ---
         const logLines = [
             "CRITICAL: SECURITY BREACH DETECTED...",
@@ -288,7 +302,7 @@
                     logBox.appendChild(line);
                     document.getElementById('boot-log-container').scrollTop = document.getElementById('boot-log-container').scrollHeight;
                     lineIndex++;
-                    setTimeout(printLine, 200);
+                    setTimeout(printLine, 120);
                 } else {
                     setTimeout(() => {
                         document.getElementById('boot-log-container').style.display = 'none';
@@ -307,17 +321,17 @@
                                 actions.classList.remove('opacity-0', 'pointer-events-none');
                             }
                         }, 60);
-                    }, 400);
+                    }, 300);
                 }
             }
-            setTimeout(printLine, 500);
+            setTimeout(printLine, 300);
         }
 
         // --- 🕒 独立型ポモドーロタイマーロジック ---
         let pomoMinutesStudy = 25;
         let pomoMinutesBreak = 5;
         let pomoSecondsLeft = pomoMinutesStudy * 60;
-        let pomoTimerState = 'STUDY'; // STUDY or BREAK
+        let pomoTimerState = 'STUDY'; 
         let pomoIntervalId = null;
 
         const pomoScreen = document.getElementById('pomodoro-screen');
@@ -379,24 +393,34 @@
             updatePomoClockUI();
         };
 
-        // --- 通知テストシステム ---
-        document.getElementById('test-notification-btn').onclick = () => {
-            const userName = getUserName();
+        // --- 🔔 通知テストシステム＆状況判定通知 ---
+        function triggerPushNotification(title, body) {
             if (Notification.permission === 'granted') {
                 navigator.serviceWorker.ready.then(registration => {
-                    registration.showNotification('大網先生の咆哮', {
-                        body: `「こらー！${userName}！今テスト通知が届いたということはシステムは万全だな！？サボりは絶対に検知するぞ！」`,
+                    registration.showNotification(title, {
+                        body: body,
                         icon: 'icon.png',
-                        vibrate: [200, 100, 200]
+                        vibrate: [300, 150, 300],
+                        data: window.location.href
                     });
+                }).catch(err => {
+                    // フォールバック（Service Worker がまだ準備中の場合）
+                    new Notification(title, { body: body });
                 });
-            } else {
-                alert('通知許可がありません。起動画面で監視システムを有効化してください。');
             }
+        }
+
+        document.getElementById('test-notification-btn').onclick = () => {
+            const userName = getUserName();
+            triggerPushNotification(
+                '大網先生の常時監視テスト',
+                `「おい、${userName}！テスト通知が届いているということは、私の眼光から逃れる術はないと理解したな！？励めよ！」`
+            );
         };
 
-        // --- Badge API 連動 ---
+        // --- ⏳ アプリ放置時間（バックグラウンドサボり）連動・激怒段階システム ---
         let offlineAngerCount = parseInt(localStorage.getItem('offlineAnger')) || 0;
+        
         function updateAngerBadge(count) {
             if ('setAppBadge' in navigator) {
                 if (count > 0) navigator.setAppBadge(count).catch(e => console.log(e));
@@ -404,19 +428,50 @@
             }
             localStorage.setItem('offlineAnger', count);
         }
+
         window.addEventListener('focus', () => {
             const userName = getUserName();
             const lastTime = localStorage.getItem('lastActiveTime');
+            
             if (lastTime) {
-                const addedAnger = Math.floor((Date.now() - parseInt(lastTime)) / 30000);
-                if (addedAnger > 0) { offlineAngerCount += addedAnger; updateAngerBadge(offlineAngerCount); }
+                const elapsedMs = Date.now() - parseInt(lastTime);
+                const elapsedSec = Math.floor(elapsedMs / 1000);
+                
+                // 15秒サボるごとに怒りバッジ加算
+                const addedAnger = Math.floor(elapsedSec / 15);
+                if (addedAnger > 0) { 
+                    offlineAngerCount += addedAnger; 
+                    updateAngerBadge(offlineAngerCount); 
+                }
+
+                // 経過時間（サボり度）に応じて大網先生のセリフが変化
+                if (elapsedSec >= 120) { // 2分以上放置（破門級）
+                    triggerPushNotification(
+                        '🚨 大網先生の堪忍袋の緒',
+                        `「${userName}！！！お前はどれだけ自習室を空ければ気が済むんだ！？戻ってこないなら叩き出すぞ！！」`
+                    );
+                    alert(`大網先生「お前が画面を離れてから【${elapsedSec}秒】も経過しているぞ、${userName}！！アイコンの怒りバッジを見ろ！次はないと思え！！」`);
+                } else if (elapsedSec >= 45) { // 45秒以上放置（激怒級）
+                    triggerPushNotification(
+                        '⚡ 大網先生の咆哮',
+                        `「おい、${userName}！自習室に戻れ！他人のサボりはお前のサボり、お前のサボりは許さん！」`
+                    );
+                    alert(`大網先生「ほう、ずいぶんと長い間スマホを手放していたようだな、${userName}。サボり魔のバッジが【${offlineAngerCount}】まで跳ね上がっているぞ！」`);
+                } else if (elapsedSec >= 15) { // 15秒以上放置（警告級）
+                    triggerPushNotification(
+                        '📢 大網先生の視線',
+                        `「${userName}、席を外してどこへ行っていた？集中力が散漫になっている証拠だぞ。」`
+                    );
+                }
             }
-            if (offlineAngerCount > 0) {
-                alert(`大網先生「私が不在の間、アイコンの怒りバッジが【${offlineAngerCount}】まで跳ね上がっているぞ、${userName}！サボり魔め！」`);
-                offlineAngerCount = 0; updateAngerBadge(0);
-            }
+            // 帰還したらバッジをリセット
+            offlineAngerCount = 0; 
+            updateAngerBadge(0);
         });
-        window.addEventListener('blur', () => localStorage.setItem('lastActiveTime', Date.now().toString()));
+
+        window.addEventListener('blur', () => {
+            localStorage.setItem('lastActiveTime', Date.now().toString());
+        });
 
         // Camo Screens
         const urlParams = new URLSearchParams(window.location.search);
@@ -520,11 +575,9 @@
 
         // 設定ダイアログでの保存・同期
         document.getElementById('save-settings-btn').onclick = () => {
-            // 名前の保存処理
             const inputName = document.getElementById('user-nickname-input').value.trim();
             localStorage.setItem('userNickname', inputName);
             
-            // ポモドーロ時間の保存処理
             pomoMinutesStudy = parseInt(document.getElementById('timer-study-input').value) || 25;
             pomoMinutesBreak = parseInt(document.getElementById('timer-break-input').value) || 5;
             pomoTimerState = 'STUDY';
@@ -540,7 +593,6 @@
             document.getElementById('settings-dialog').classList.add('hidden');
         };
 
-        // 初期ロード時にローカルストレージから名前を復元
         function loadSavedNickname() {
             const savedName = localStorage.getItem('userNickname');
             if (savedName) {
@@ -570,6 +622,7 @@
             return new THREE.CanvasTexture(canvas);
         }
 
+        // 【大網先生復活のバグ修正版】
         function createDetailedPerson(isSensei = false) {
             const group = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.6 });
@@ -605,10 +658,12 @@
             const skull = new THREE.Mesh(new THREE.SphereGeometry(0.24, 32, 16), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
             
             if (isSensei) {
-                const eyeGeo = new THREE.SphereGeometry(0.035, 8, 8); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.09, 0.05, 0.2);
-                const eR = new THREE.Mesh(eyeGeo, eyeMat); eR.position.set(0.09, 0.05, 0.2);
-                headGroup.add(eL, eR); group.eyes = [eL, eR];
+                const eyeGeo = new THREE.SphereGeometry(0.035, 8, 8); 
+                const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const eL = new THREE.Mesh(eyeGeo, eyeMat.clone()); eL.position.set(-0.09, 0.05, 0.2);
+                const eR = new THREE.Mesh(eyeGeo, eyeMat.clone()); eR.position.set(0.09, 0.05, 0.2);
+                headGroup.add(eL, eR); 
+                group.eyes = [eL, eR]; // 先生オブジェクトのプロパティとして配列を設定
             } else {
                 const hairGeo = new THREE.SphereGeometry(0.25, 16, 16, 0, Math.PI * 2, 0, Math.PI / 1.7);
                 const hair = new THREE.Mesh(hairGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 })); hair.scale.set(1.02, 1.05, 1.05); headGroup.add(hair);
@@ -653,6 +708,7 @@
                 }
             }
 
+            // 大網先生インスタンス生成
             sensei = createDetailedPerson(true); sensei.position.set(0, 0, -15); scene.add(sensei);
             
             setCamoScreen(initialCamo); loadSavedNickname(); updatePomoClockUI();
@@ -672,6 +728,7 @@
         }
 
         function updateAI() {
+            if (!sensei) return;
             const time = Date.now() * 0.005; aiTimer -= 1;
             
             if (aiState === 'WALK') {
