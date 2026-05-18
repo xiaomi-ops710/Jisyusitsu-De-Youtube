@@ -54,9 +54,9 @@
 
         <!-- スマホ・デバイス画面 -->
         <div id="youtube-device">
-            <!-- STUDY MODE (動的に切り替わるカモフラージュ) -->
+            <!-- STUDY MODE -->
             <div id="screen-study" class="w-full h-full p-4 flex flex-col bg-white overflow-hidden text-slate-800">
-                <!-- ここはJavaScriptで書き換わります -->
+                <!-- JavaScriptで動的ロード -->
             </div>
 
             <!-- YOUTUBE MODE -->
@@ -101,7 +101,7 @@
                 <!-- 1. 通知テスト -->
                 <div class="p-4 m3-card bg-white">
                     <h3 class="text-sm font-medium text-[#6750a4] mb-2 flex items-center gap-1"><span class="material-icons-outlined text-sm">notifications_active</span> 通知テスト機能</h3>
-                    <p class="text-xs text-slate-500 mb-3">ボタンを押すと、バックグラウンドから大網先生の通知が即座にテスト送信されます。</p>
+                    <p class="text-xs text-slate-500 mb-3">ボタンを押すと、大網先生からの通知が即座にテスト送信されます。</p>
                     <button id="test-notif-btn" class="w-full py-2.5 m3-btn-tonal text-sm font-medium flex items-center justify-center gap-2">
                         <span class="material-icons-outlined text-sm">send</span> 大網先生からの通知をテスト
                     </button>
@@ -128,14 +128,6 @@
                             <input type="radio" name="camo-select" value="japanese" class="w-4 h-4 accent-[#6750a4]">
                         </label>
                     </div>
-                </div>
-
-                <!-- 3. アイコン設定情報 -->
-                <div class="p-4 m3-card bg-white">
-                    <h3 class="text-sm font-medium text-[#6750a4] mb-1 flex items-center gap-1"><span class="material-icons-outlined text-sm">collections</span> アイコンの変更について</h3>
-                    <p class="text-xs text-slate-600 leading-relaxed">
-                        PWAの仕様上、アイコンはリポジトリの <code class="bg-slate-100 px-1 rounded">icon.png</code> と連動します。アイコン画像を変更したい場合は、GitHub上の画像を上書きしてください。次回起動時に反映されます。
-                    </p>
                 </div>
             </div>
 
@@ -170,6 +162,49 @@
     </div>
 
     <script>
+        const messages = [
+            "まだ自習室でYouTube見てるの？",
+            "お前、YouTube見てるのバレてるからな。",
+            "勉強ちゃんとやってるの？",
+            "おい、スマホ触るのやめろ！",
+            "自習室の帝王をなめるなよ。",
+            "今、目が合ったな？勉強しなさい。"
+        ];
+
+        // --- 強制通知発行システム (アプリ前面でも確実に動くカスタム仕様) ---
+        function triggerImmediateNotificationDirect() {
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            if (!('Notification' in window)) {
+                alert("📢 大網先生：「" + randomMessage + "」");
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                // 1. まず標準の通知APIを前面で即発火させる
+                try {
+                    new Notification("大網先生", {
+                        body: randomMessage,
+                        icon: "icon.png",
+                        badge: "icon.png"
+                    });
+                } catch (e) {
+                    // 2. モバイルSafari/PWA等で上のコンストラクタが弾かれた場合は、Service Workerを強制経由
+                    if ('serviceWorker' in navigator) {
+                        navigator.serviceWorker.ready.then(reg => {
+                            reg.showNotification("大網先生", {
+                                body: randomMessage,
+                                icon: "icon.png"
+                            });
+                        });
+                    }
+                }
+            } else {
+                // 万が一権限が切れている場合はフォールバック
+                alert("📢 大網先生：「" + randomMessage + "」\n(通知権限がありません)");
+            }
+        }
+
         // --- カモフラージュ画面のデータテンプレート ---
         const camoTemplates = {
             math: `
@@ -235,7 +270,7 @@
             if(container) container.innerHTML = camoTemplates[type];
         }
 
-        // --- PWA Service Worker 登録 & 設定画面UIイベント ---
+        // Service Worker 登録
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').then((reg) => {
                 console.log('Service Worker Registered');
@@ -250,30 +285,19 @@
             document.getElementById('settings-dialog').classList.add('hidden');
         };
 
-        // カモフラージュ切り替えラジオボタンイベント
+        // カモフラージュ切り替えイベント
         document.querySelectorAll('input[name="camo-select"]').forEach(radio => {
             radio.addEventListener('change', (e) => {
                 setCamoScreen(e.target.value);
             });
         });
 
-        // テスト通知送信ボタン
+        // 【修正】テスト通知ボタンイベント（最強フォールバック関数を実行）
         document.getElementById('test-notif-btn').onclick = () => {
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.ready.then(reg => {
-                    if (reg.active) {
-                        // Service Workerに対して「今すぐ通知を出せ」とシグナルを送信
-                        reg.active.postMessage({ action: 'triggerImmediateNotification' });
-                    } else {
-                        alert("アプリがまだ完全に準備できていません。一度ゲームを開始してみてください。");
-                    }
-                });
-            } else {
-                alert("Service Workerに対応していません。");
-            }
+            triggerImmediateNotificationDirect();
         };
 
-        // 通知権限の要求処理
+        // 通知権限の要求
         document.getElementById('auth-btn').onclick = function() {
             if (!('Notification' in window)) {
                 alert('このブラウザは通知に対応していません。iPadのホーム画面から起動してください。');
@@ -304,7 +328,7 @@
             });
         };
 
-        // --- 以下、Three.js ゲームコアロジック ---
+        // --- Three.js ゲームコアロジック ---
         let scene, camera, renderer, sensei, head, students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
         let clock = new THREE.Clock();
@@ -441,7 +465,6 @@
             sensei.position.set(0, 0, -10);
             scene.add(sensei);
 
-            // 初期カモフラージュ画面を設定
             setCamoScreen('math');
 
             const startAction = (e) => {
