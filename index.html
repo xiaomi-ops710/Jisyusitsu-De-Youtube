@@ -15,24 +15,17 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script>
-        // ==========================================
-        // 🔑 ここにあなたのGemini APIキーを入力してください
-        // ==========================================
-        const GEMINI_API_KEY = "ここにあなたのAPIキーを記述";
-    </script>
 
     <style>
-        body { margin: 0; overflow: hidden; background: #0b151a; touch-action: none; font-family: 'Roboto', 'Noto Sans JP', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #0b151a; touch-action: none; font-family: 'Roboto', 'Noto Sans JP', sans-serif; width: 100vw; height: 100vh; }
         #ui-layer { position: absolute; inset: 0; pointer-events: none; z-index: 50; }
         
-        /* --- Material 3 iPad Optimized Blue System --- */
-        .m3-hud { background: rgba(19, 32, 38, 0.9); backdrop-filter: blur(16px); border-radius: 24px; color: #e1e3e5; padding: 16px 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
+        /* --- Material 3 Design System --- */
+        .m3-hud { background: rgba(19, 32, 38, 0.85); backdrop-filter: blur(16px); border-radius: 24px; color: #e1e3e5; padding: 16px 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); }
         .m3-dialog { background: #1a2c34; color: #e1e3e5; border-radius: 28px; box-shadow: 0px 10px 30px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .m3-card { background: #223742; border-radius: 16px; border: 1px solid #404e56; }
         
-        /* ボタン */
+        /* Buttons */
         .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
         .m3-btn-primary:hover { background: #b3e5ff; transform: scale(1.02); }
         .m3-btn-tonal { background: #334a54; color: #bbe6ff; border-radius: 100px; font-weight: 500; transition: all 0.2s; padding: 12px 28px; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; }
@@ -46,36 +39,33 @@
         .active-view { transform: translateX(-50%) translateY(-20px) scale(1.03); }
         #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 30%, rgba(255, 180, 180, 0.4) 100%); opacity: 0; transition: opacity 0.2s; z-index: 40; }
         
-        .m3-overlay-screen { position: absolute; inset: 0; background: #050b0d; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; color: #e1e3e5; padding: 40px; }
+        .m3-overlay-screen { position: fixed; inset: 0; width: 100vw; height: 100vh; background: #050b0d; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 500; text-align: center; color: #e1e3e5; padding: 40px; box-sizing: border-box; }
         
-        /* 🎨 Gemini風グラデーション：文字追加＆横長化バージョン */
         #gemini-ai-trigger {
             position: absolute; bottom: 40px; right: 40px; height: 64px; padding: 0 28px; border-radius: 32px;
             background: linear-gradient(45deg, #1a73e8, #9333ea, #ff7300, #1a73e8); background-size: 300% 300%;
             animation: geminiGradient 6s ease infinite; z-index: 90; pointer-events: auto; box-shadow: 0 8px 32px rgba(147, 51, 234, 0.4);
-            display: flex; align-items: center; gap: 12px; color: white; transition: transform 0.2s; font-weight: 700; font-size: 1.05rem;
+            display: flex; align-items: center; gap: 12px; color: white; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); font-weight: 700; font-size: 1.05rem;
         }
-        #gemini-ai-trigger:hover { transform: scale(1.05); }
+        #gemini-ai-trigger.click-pop { transform: scale(0.85) translateY(10px); opacity: 0.6; }
         @keyframes geminiGradient {
             0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; }
         }
         
-        /* 📱 iPad向け：右側縦長型 Ami AI サイドバー */
+        /* Ami AI 縦長サイドバー */
         #ai-dock { 
             position: absolute; top: 0; right: 0; width: 420px; height: 100%; 
             background: rgba(26, 44, 52, 0.95); backdrop-filter: blur(20px);
             z-index: 150; border-left: 1px solid rgba(255,255,255,0.1); 
             transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
-            box-shadow: -10px 0 40px rgba(0,0,0,0.5);
-            display: flex; flex-direction: column;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.5); display: flex; flex-direction: column;
         }
-        .ai-collapsed { transform: translateX(420px); } /* 最初から画面外へ完全に隠す */
+        .ai-collapsed { transform: translateX(420px); }
         .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
 
-        /* 🎬 起動演出用 */
         #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 13px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 120px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid rgba(124, 212, 255, 0.2); }
         .glitch-title { font-size: 4rem; font-weight: 900; font-style: italic; letter-spacing: -2px; color: #ffffff; text-shadow: 0 0 10px rgba(124,212,255,0.5); display: none; margin-bottom: 8px; }
-        .boot-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 6px 100%; z-index: 110; pointer-events: none; }
+        .boot-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06)); background-size: 100% 4px, 6px 100%; z-index: 510; pointer-events: none; }
         .pulse-alert { animation: redAlertEffect 0.6s ease-out 3; }
         @keyframes redAlertEffect {
             0% { background-color: #0b151a; } 50% { background-color: #401015; } 100% { background-color: #0b151a; }
@@ -88,23 +78,19 @@
             <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest">Score</div>
             <div id="score-text" class="text-4xl font-black text-[#7cd4ff]">0000</div>
         </div>
-        
-        <div class="absolute top-8 left-[240px] m3-hud flex items-center gap-4">
-            <div>
-                <div id="timer-label" class="text-[10px] text-amber-300 font-bold uppercase tracking-wider">自習中</div>
-                <div id="timer-display" class="text-2xl font-mono font-bold text-white">30:00</div>
-            </div>
-            <span class="material-icons-outlined text-amber-300">hourglass_top</span>
-        </div>
 
-        <div class="absolute top-8 right-[460px] m3-hud w-56">
+        <div class="absolute top-8 right-[240px] m3-hud w-56">
             <div class="text-[11px] text-[#bbe6ff] font-bold uppercase tracking-widest mb-1.5 text-right">Suspicion</div>
             <div class="h-2.5 w-full bg-[#334a54] rounded-full overflow-hidden">
                 <div id="suspicion-bar" class="h-full bg-red-400 w-0 transition-all duration-75"></div>
             </div>
         </div>
 
-        <button id="settings-toggle-btn" class="absolute top-8 right-[380px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
+        <button id="pomodoro-toggle-btn" class="absolute top-8 right-[150px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
+            <span class="material-icons-outlined text-2xl text-amber-300">hourglass_empty</span>
+        </button>
+
+        <button id="settings-toggle-btn" class="absolute top-8 right-[70px] w-14 h-14 m3-btn-icon flex items-center justify-center shadow-lg">
             <span class="material-icons-outlined text-2xl">settings</span>
         </button>
 
@@ -145,7 +131,7 @@
         </div>
         
         <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0b151a] rounded-2xl text-sm space-y-3 border border-[#404e56] text-[#e1e3e5] font-mono">
-            <div class="text-red-300 font-bold">大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？」</div>
+            <div id="ai-greeting-text" class="text-red-300 font-bold">大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？」</div>
         </div>
 
         <div class="flex flex-col gap-3">
@@ -165,6 +151,29 @@
         </div>
     </div>
 
+    <div id="pomodoro-screen" class="hidden fixed inset-0 bg-[#0b151a]/95 backdrop-blur-xl z-[400] flex flex-col items-center justify-center p-6">
+        <div class="text-center max-w-md w-full">
+            <div id="pomo-status-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8">
+                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME
+            </div>
+            
+            <div id="pomo-clock" class="text-8xl font-thin font-mono text-slate-200 tracking-tight mb-12 select-none">25:00</div>
+            
+            <div class="flex items-center justify-center gap-4 mb-16">
+                <button id="pomo-start-pause-btn" class="w-20 h-20 rounded-full bg-[#7cd4ff] text-[#003547] flex items-center justify-center shadow-xl transition-transform active:scale-95">
+                    <span id="pomo-ctrl-icon" class="material-icons-outlined text-3xl font-bold">play_arrow</span>
+                </button>
+                <button id="pomo-reset-btn" class="w-14 h-14 rounded-full bg-[#334a54] text-[#bbe6ff] flex items-center justify-center shadow-md transition-transform active:scale-95">
+                    <span class="material-icons-outlined text-xl">refresh</span>
+                </button>
+            </div>
+
+            <button id="pomo-close-btn" class="m3-btn-tonal text-sm px-8 py-3">
+                <span class="material-icons-outlined text-sm">visibility</span> 自習監視状況を覗く
+            </button>
+        </div>
+    </div>
+
     <div id="settings-dialog" class="hidden absolute inset-0 bg-black/70 backdrop-blur-md z-[300] flex items-center justify-center p-6">
         <div class="m3-dialog w-full max-w-lg p-8 flex flex-col max-h-[90vh] pointer-events-auto">
             <div class="flex items-center justify-between mb-6">
@@ -178,18 +187,30 @@
 
             <div class="flex-grow overflow-y-auto space-y-6 pr-2">
                 <div class="p-5 m3-card">
-                    <h3 class="text-base font-bold text-[#7cd4ff] mb-3 flex items-center gap-2"><span class="material-icons-outlined">av_timer</span> ポモドーロタイマー時間設定</h3>
+                    <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">badge</span> 塾生ユーザー名登録</h3>
+                    <p class="text-xs text-slate-400 mb-3 leading-relaxed">大網先生や通知システムに呼ばれたいお前の名前を指定しろ。</p>
+                    <input type="text" id="user-nickname-input" placeholder="（未設定時は「お前」）" class="w-full m3-input text-sm">
+                </div>
+
+                <div class="p-5 m3-card">
+                    <h3 class="text-base font-bold text-[#7cd4ff] mb-3 flex items-center gap-2"><span class="material-icons-outlined">av_timer</span> ポモドーロ時間カスタム</h3>
                     <div class="grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <label class="block text-xs text-[#bbe6ff] mb-1">自習時間（分）</label>
-                            <input type="number" id="timer-study-input" value="30" class="w-full m3-input">
+                            <label class="block text-xs text-[#bbe6ff] mb-1">フォーカス（分）</label>
+                            <input type="number" id="timer-study-input" value="25" class="w-full m3-input">
                         </div>
                         <div>
-                            <label class="block text-xs text-[#bbe6ff] mb-1">休憩時間（分）</label>
+                            <label class="block text-xs text-[#bbe6ff] mb-1">休憩（分）</label>
                             <input type="number" id="timer-break-input" value="5" class="w-full m3-input">
                         </div>
                     </div>
-                    <button id="save-settings-btn" class="w-full m3-btn-primary py-3 text-sm mt-4"><span class="material-icons-outlined text-sm">save</span>設定を適用してタイマーリセット</button>
+                    <button id="save-settings-btn" class="w-full m3-btn-primary py-3 text-sm mt-4"><span class="material-icons-outlined text-sm">tune</span> 設定を保存・同期する</button>
+                </div>
+
+                <div class="p-5 m3-card">
+                    <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">campaign</span> 監視連動システムテスト</h3>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">バックグラウンド環境移行時に大網先生が適切に激怒するかを今すぐ模擬チェックします。</p>
+                    <button id="test-notification-btn" class="w-full m3-btn-tonal py-3 text-sm"><span class="material-icons-outlined text-sm">notifications_active</span> テスト通知を送信する</button>
                 </div>
 
                 <div class="p-5 m3-card">
@@ -230,7 +251,18 @@
     </div>
 
     <script>
-        // --- 本格ゲーム起動アニメーション演出システム ---
+        // ==========================================
+        // 🔑 【自分で入力用】コード内APIキー設定
+        // ==========================================
+        const GEMINI_API_KEY = "AIzaSyAorKSTtiQBjrzf556ZaiW_7bmqKHJKGmo";
+
+        // --- ニックネーム取得用ヘルパー ---
+        function getUserName() {
+            const savedName = localStorage.getItem('userNickname');
+            return savedName && savedName.trim() !== "" ? savedName.trim() : "お前";
+        }
+
+        // --- 起動アニメーション演出システム ---
         const logLines = [
             "CRITICAL: SECURITY BREACH DETECTED...",
             "INITIALIZING OAMI MONITORING CORE V3...",
@@ -256,7 +288,7 @@
                     logBox.appendChild(line);
                     document.getElementById('boot-log-container').scrollTop = document.getElementById('boot-log-container').scrollHeight;
                     lineIndex++;
-                    setTimeout(printLine, 250);
+                    setTimeout(printLine, 200);
                 } else {
                     setTimeout(() => {
                         document.getElementById('boot-log-container').style.display = 'none';
@@ -278,45 +310,92 @@
                     }, 400);
                 }
             }
-            setTimeout(printLine, 600);
+            setTimeout(printLine, 500);
         }
 
-        // --- ポモドーロタイマーロジック ---
-        let timerState = 'STUDY';
-        let timerSecondsLeft = 30 * 60;
-        let studyMinutes = 30;
-        let breakMinutes = 5;
+        // --- 🕒 独立型ポモドーロタイマーロジック ---
+        let pomoMinutesStudy = 25;
+        let pomoMinutesBreak = 5;
+        let pomoSecondsLeft = pomoMinutesStudy * 60;
+        let pomoTimerState = 'STUDY'; // STUDY or BREAK
+        let pomoIntervalId = null;
 
-        function updateTimerUI() {
-            const mins = Math.floor(timerSecondsLeft / 60).toString().padStart(2, '0');
-            const secs = (timerSecondsLeft % 60).toString().padStart(2, '0');
-            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
-            const label = document.getElementById('timer-label');
-            if(timerState === 'STUDY') {
-                label.innerText = "自習中"; label.style.color = "#51daff";
+        const pomoScreen = document.getElementById('pomodoro-screen');
+        const pomoClock = document.getElementById('pomo-clock');
+        const pomoStartPauseBtn = document.getElementById('pomo-start-pause-btn');
+        const pomoCtrlIcon = document.getElementById('pomo-ctrl-icon');
+        const pomoBadge = document.getElementById('pomo-status-badge');
+
+        function updatePomoClockUI() {
+            const m = Math.floor(pomoSecondsLeft / 60).toString().padStart(2, '0');
+            const s = (pomoSecondsLeft % 60).toString().padStart(2, '0');
+            pomoClock.innerText = `${m}:${s}`;
+        }
+
+        function togglePomoTimer() {
+            const userName = getUserName();
+            if (pomoIntervalId) {
+                clearInterval(pomoIntervalId);
+                pomoIntervalId = null;
+                pomoCtrlIcon.innerText = 'play_arrow';
             } else {
-                label.innerText = "休憩タイム"; label.style.color = "#4ade80";
+                pomoCtrlIcon.innerText = 'pause';
+                pomoIntervalId = setInterval(() => {
+                    if (pomoSecondsLeft > 0) {
+                        pomoSecondsLeft--;
+                        updatePomoClockUI();
+                    } else {
+                        clearInterval(pomoIntervalId);
+                        pomoIntervalId = null;
+                        pomoCtrlIcon.innerText = 'play_arrow';
+                        
+                        if (pomoTimerState === 'STUDY') {
+                            pomoTimerState = 'BREAK';
+                            pomoSecondsLeft = pomoMinutesBreak * 60;
+                            pomoBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> BREAK TIME`;
+                            pomoBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-500/10 text-green-300 text-xs font-bold tracking-widest uppercase mb-8";
+                            alert(`大網先生「よし、時間だ。${userName}、休憩を許可する。頭を冷やしてこい」`);
+                        } else {
+                            pomoTimerState = 'STUDY';
+                            pomoSecondsLeft = pomoMinutesStudy * 60;
+                            pomoBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME`;
+                            pomoBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8";
+                            alert(`大網先生「休憩終了だ、${userName}！再び集中しろ！」`);
+                        }
+                        updatePomoClockUI();
+                    }
+                }, 1000);
             }
         }
 
-        setInterval(() => {
-            if (gameActive && !isWatching && timerSecondsLeft > 0) {
-                timerSecondsLeft--;
-                updateTimerUI();
-                if(timerSecondsLeft === 0) {
-                    if(timerState === 'STUDY') {
-                        timerState = 'BREAK'; timerSecondsLeft = breakMinutes * 60;
-                        alert("大網先生「よし、時間だ。5分間の休憩を許可する」");
-                    } else {
-                        timerState = 'STUDY'; timerSecondsLeft = studyMinutes * 60;
-                        alert("大網先生「休憩終わりだ！直ちに自習を再開しろ！」");
-                    }
-                    updateTimerUI();
-                }
-            }
-        }, 1000);
+        document.getElementById('pomodoro-toggle-btn').onclick = (e) => { e.stopPropagation(); pomoScreen.classList.remove('hidden'); };
+        document.getElementById('pomo-close-btn').onclick = () => pomoScreen.classList.add('hidden');
+        pomoStartPauseBtn.onclick = togglePomoTimer;
+        document.getElementById('pomo-reset-btn').onclick = () => {
+            clearInterval(pomoIntervalId);
+            pomoIntervalId = null;
+            pomoCtrlIcon.innerText = 'play_arrow';
+            pomoSecondsLeft = (pomoTimerState === 'STUDY' ? pomoMinutesStudy : pomoMinutesBreak) * 60;
+            updatePomoClockUI();
+        };
 
-        // --- Badge API ---
+        // --- 通知テストシステム ---
+        document.getElementById('test-notification-btn').onclick = () => {
+            const userName = getUserName();
+            if (Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification('大網先生の咆哮', {
+                        body: `「こらー！${userName}！今テスト通知が届いたということはシステムは万全だな！？サボりは絶対に検知するぞ！」`,
+                        icon: 'icon.png',
+                        vibrate: [200, 100, 200]
+                    });
+                });
+            } else {
+                alert('通知許可がありません。起動画面で監視システムを有効化してください。');
+            }
+        };
+
+        // --- Badge API 連動 ---
         let offlineAngerCount = parseInt(localStorage.getItem('offlineAnger')) || 0;
         function updateAngerBadge(count) {
             if ('setAppBadge' in navigator) {
@@ -326,13 +405,14 @@
             localStorage.setItem('offlineAnger', count);
         }
         window.addEventListener('focus', () => {
+            const userName = getUserName();
             const lastTime = localStorage.getItem('lastActiveTime');
             if (lastTime) {
                 const addedAnger = Math.floor((Date.now() - parseInt(lastTime)) / 30000);
                 if (addedAnger > 0) { offlineAngerCount += addedAnger; updateAngerBadge(offlineAngerCount); }
             }
             if (offlineAngerCount > 0) {
-                alert(`大網先生「私が不在の間、アイコンの怒りバッジが【${offlineAngerCount}】まで跳ね上がっているぞ。サボり魔め！」`);
+                alert(`大網先生「私が不在の間、アイコンの怒りバッジが【${offlineAngerCount}】まで跳ね上がっているぞ、${userName}！サボり魔め！」`);
                 offlineAngerCount = 0; updateAngerBadge(0);
             }
         });
@@ -354,13 +434,20 @@
             if (radio) radio.checked = true;
         }
 
-        // --- 🤖 Ami AI サイドバー＆Gemini風タイピング演出システム ---
+        // --- 🤖 Ami AI サイドバー関連 ---
         let selectedBase64Image = null;
         const aiTrigger = document.getElementById('gemini-ai-trigger');
         const aiDock = document.getElementById('ai-dock');
         const aiCloseBtn = document.getElementById('ai-close-sidebar');
         
-        aiTrigger.onclick = (e) => { e.stopPropagation(); aiDock.classList.toggle('ai-collapsed'); };
+        aiTrigger.onclick = (e) => { 
+            e.stopPropagation(); 
+            aiTrigger.classList.add('click-pop');
+            setTimeout(() => {
+                aiTrigger.classList.remove('click-pop');
+                aiDock.classList.toggle('ai-collapsed'); 
+            }, 180);
+        };
         aiCloseBtn.onclick = () => aiDock.classList.add('ai-collapsed');
 
         document.getElementById('ai-file-input').onchange = (e) => {
@@ -372,28 +459,13 @@
             reader.readAsDataURL(file);
         };
 
-        document.getElementById('save-settings-btn').onclick = () => {
-            studyMinutes = parseInt(document.getElementById('timer-study-input').value) || 30;
-            breakMinutes = parseInt(document.getElementById('timer-break-input').value) || 5;
-            timerSecondsLeft = studyMinutes * 60; timerState = 'STUDY'; updateTimerUI();
-            alert('大網先生「自習タイマーの周期を再同期した。一秒も無駄にするな」');
-            document.getElementById('settings-dialog').classList.add('hidden');
-        };
-
-        // 📝 Gemini風文字タイピングエフェクト関数
         function typeWriterEffect(element, fullText, speed = 25) {
-            let i = 0;
-            element.innerHTML = ""; // 初期化
+            let i = 0; element.innerHTML = "";
             function type() {
                 if (i < fullText.length) {
-                    // 改行コードをM3ログに正しく反映
-                    if (fullText.substr(i, 4) === "<br>") {
-                        element.innerHTML += "<br>"; i += 4;
-                    } else if (fullText.charAt(i) === "\n") {
-                        element.innerHTML += "<br>"; i++;
-                    } else {
-                        element.innerHTML += fullText.charAt(i); i++;
-                    }
+                    if (fullText.substr(i, 4) === "<br>") { element.innerHTML += "<br>"; i += 4; }
+                    else if (fullText.charAt(i) === "\n") { element.innerHTML += "<br>"; i++; }
+                    else { element.innerHTML += fullText.charAt(i); i++; }
                     document.getElementById('ai-chat-log').scrollTop = document.getElementById('ai-chat-log').scrollHeight;
                     setTimeout(type, speed);
                 }
@@ -403,15 +475,17 @@
 
         document.getElementById('ai-send-btn').onclick = async () => {
             const textInput = document.getElementById('ai-text-input').value.trim();
-            if (GEMINI_API_KEY === "ここにあなたのAPIキーを記述" || !GEMINI_API_KEY) { 
-                alert('ソースコード22行目の GEMINI_API_KEY に正しいキーを記述してください。'); 
+            const userName = getUserName();
+            
+            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("ここにGeminiの")) { 
+                alert('Ami AIの稼働にはAPIキーの設定が必要です。HTMLコードの最上部にある「GEMINI_API_KEY」に有効なキーを入力してください。'); 
                 return; 
             }
             if (!textInput && !selectedBase64Image) return;
 
             const chatLog = document.getElementById('ai-chat-log');
             const userMsgHtml = document.createElement('div'); userMsgHtml.className = "text-slate-400";
-            userMsgHtml.innerText = `お前「${textInput || "（課題画像を提出）"}」`;
+            userMsgHtml.innerText = `${userName}「${textInput || "（課題画像を提出）"}」`;
             chatLog.appendChild(userMsgHtml); document.getElementById('ai-text-input').value = "";
 
             const systemMsgHtml = document.createElement('div'); systemMsgHtml.className = "text-[#7cd4ff] animate-pulse font-bold";
@@ -419,10 +493,10 @@
             chatLog.scrollTop = chatLog.scrollHeight;
 
             const promptText = `あなたは非常に厳格で威圧的な、絶対に生徒のサボりを許さない伝説の塾講師「大網先生」です。ユーザー（塾生）からの質問・問題に対して、徹底的に正しく解説をしてください。その際、必ず以下のディレクションを守ること。
-・口調は厳しく、少し怖め。二人称は「お前」か「貴様」。
-・「こんな問題もわからないのか」「甘えるな」「自習室の帝王を舐めるな」といった説教を必ず織り交ぜる。
+・ユーザーの名前（ニックネーム）は「${userName}」です。二人称として必ず「${userName}」を呼ぶか、たまに「貴様」を織り交ぜてください。
+・「こんな問題もわからないのか、${userName}」「甘えるな」「自習室の帝王を舐めるな」といった説教を必ず織り交ぜる。
 ・解説自体は数学、国語、英語などどんな内容であっても、論理的かつ完璧に行うこと。
-ユーザーの質問: ${textInput}`;
+ユーザー（${userName}）の質問: ${textInput}`;
 
             let parts = [{ text: promptText }];
             if (selectedBase64Image) parts.push({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
@@ -435,27 +509,55 @@
                 const data = await response.json();
                 const replyText = data.candidates[0].content.parts[0].text;
                 
-                // アニメーションを解いてタイピング演出へ移管
                 systemMsgHtml.classList.remove('animate-pulse'); 
                 systemMsgHtml.className = "text-red-300 font-bold";
-                
-                // タイピング処理のキックオフ
                 typeWriterEffect(systemMsgHtml, `大網先生「${replyText}`);
             } catch (err) {
-                systemMsgHtml.className = "text-amber-400"; systemMsgHtml.innerText = "大網先生「通信エラーだ。貴様のキーの詰めが甘い！」";
+                systemMsgHtml.className = "text-amber-400"; systemMsgHtml.innerText = "大網先生「通信エラーだ。お前のコード内キー設定に不備があるようだな！」";
             }
             selectedBase64Image = null; document.getElementById('file-preview-name').classList.add('hidden');
         };
 
-        // --- 設定ダイアログ処理 ---
+        // 設定ダイアログでの保存・同期
+        document.getElementById('save-settings-btn').onclick = () => {
+            // 名前の保存処理
+            const inputName = document.getElementById('user-nickname-input').value.trim();
+            localStorage.setItem('userNickname', inputName);
+            
+            // ポモドーロ時間の保存処理
+            pomoMinutesStudy = parseInt(document.getElementById('timer-study-input').value) || 25;
+            pomoMinutesBreak = parseInt(document.getElementById('timer-break-input').value) || 5;
+            pomoTimerState = 'STUDY';
+            pomoSecondsLeft = pomoMinutesStudy * 60;
+            pomoBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> FOCUS TIME`;
+            pomoBadge.className = "inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 text-xs font-bold tracking-widest uppercase mb-8";
+            updatePomoClockUI();
+            
+            const currentName = getUserName();
+            document.getElementById('ai-greeting-text').innerText = `大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か、${currentName}？」`;
+
+            alert(`大網先生「環境を再構築したぞ、${currentName}。一秒も無駄にするな」`);
+            document.getElementById('settings-dialog').classList.add('hidden');
+        };
+
+        // 初期ロード時にローカルストレージから名前を復元
+        function loadSavedNickname() {
+            const savedName = localStorage.getItem('userNickname');
+            if (savedName) {
+                document.getElementById('user-nickname-input').value = savedName;
+                document.getElementById('ai-greeting-text').innerText = `大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か、${savedName}？」`;
+            }
+        }
+
         document.getElementById('settings-toggle-btn').onclick = (e) => { e.stopPropagation(); document.getElementById('settings-dialog').classList.remove('hidden'); };
         document.getElementById('settings-close-btn').onclick = () => document.getElementById('settings-dialog').classList.add('hidden');
         document.querySelectorAll('input[name="camo-select"]').forEach(radio => {
             radio.addEventListener('change', (e) => setCamoScreen(e.target.value));
         });
 
-        // --- Three.js グラフィック（リアル学校の教室化） ---
-        let scene, camera, renderer, sensei, students = [];
+        // --- 🎓 Three.js 3Dグラフィックス空間 ---
+        let scene, camera, renderer, sensei;
+        let students = [];
         let gameActive = false, isWatching = false, score = 0, suspicion = 0;
         let aiTarget = new THREE.Vector3(0, 0, -8);
         let aiState = 'WALK'; let aiTimer = 0;
@@ -471,114 +573,119 @@
         function createDetailedPerson(isSensei = false) {
             const group = new THREE.Group();
             const skinMat = new THREE.MeshStandardMaterial({ color: 0xffe0bd, roughness: 0.6 });
-            let clothMat = isSensei ? new THREE.MeshStandardMaterial({ color: 0x223344, roughness: 0.7 }) : new THREE.MeshStandardMaterial({ map: createPatternTexture('checked', `hsl(${Math.random()*360}, 60%, 45%)`, '#222'), roughness: 0.8 });
+            let clothMat = isSensei ? 
+                new THREE.MeshStandardMaterial({ color: 0x1e2d3d, roughness: 0.6 }) : 
+                new THREE.MeshStandardMaterial({ map: createPatternTexture('checked', `hsl(${Math.random()*360}, 60%, 45%)`, '#111'), roughness: 0.8 });
 
             const torso = new THREE.Group();
-            const chest = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.3), clothMat); chest.position.y = 1.25;
-            const waist = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.4, 0.25), new THREE.MeshStandardMaterial({color:0x333333})); waist.position.y = 0.95;
+            const chest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.35), clothMat); chest.position.y = 1.25;
+            const waist = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.4, 0.3), new THREE.MeshStandardMaterial({color:0x222222})); waist.position.y = 0.9;
             torso.add(chest, waist); group.add(torso);
 
             if (isSensei) {
-                const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.3, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff })); shirt.position.set(0, 1.35, 0.15);
-                const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.25, 0.02), new THREE.MeshStandardMaterial({ color: 0xdd2222 })); tie.position.set(0, 1.25, 0.16);
+                const shirt = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.3, 0.05), new THREE.MeshStandardMaterial({ color: 0xffffff })); shirt.position.set(0, 1.35, 0.16);
+                const tie = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.28, 0.02), new THREE.MeshStandardMaterial({ color: 0xcc1111 })); tie.position.set(0, 1.25, 0.17);
                 torso.add(shirt, tie);
             }
 
             group.armL = new THREE.Group(); group.armR = new THREE.Group();
-            const upperArm = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.4, 0.16), clothMat); upperArm.position.y = -0.2;
-            group.armL.add(upperArm.clone()); group.armL.position.set(-0.35, 1.45, 0);
-            group.armR.add(upperArm.clone()); group.armR.position.set(0.35, 1.45, 0);
+            const upperArm = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.45, 0.18), clothMat); upperArm.position.y = -0.22;
+            group.armL.add(upperArm.clone()); group.armL.position.set(-0.4, 1.4, 0);
+            group.armR.add(upperArm.clone()); group.armR.position.set(0.4, 1.4, 0);
             group.add(group.armL, group.armR);
 
             const createLeg = (side) => {
                 const leg = new THREE.Group();
-                const pant = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.5, 0.2), new THREE.MeshStandardMaterial({ color: 0x111111 })); pant.position.y = -0.25;
-                leg.add(pant); leg.position.set(side * 0.15, 0.8, 0); return leg;
+                const pant = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.6, 0.22), new THREE.MeshStandardMaterial({ color: 0x151515 })); pant.position.y = -0.3;
+                leg.add(pant); leg.position.set(side * 0.16, 0.75, 0); return leg;
             };
             group.legL = createLeg(-1); group.legR = createLeg(1); group.add(group.legL, group.legR);
 
             const headGroup = new THREE.Group();
-            const skull = new THREE.Mesh(new THREE.SphereGeometry(0.22, 32, 16), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
+            const skull = new THREE.Mesh(new THREE.SphereGeometry(0.24, 32, 16), skinMat); skull.scale.set(0.9, 1.1, 1); headGroup.add(skull);
             
             if (isSensei) {
-                const eyeGeo = new THREE.SphereGeometry(0.03, 8, 8); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
-                const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.08, 0.05, 0.18);
-                const eR = new THREE.Mesh(eyeGeo, eyeMat); eR.position.set(0.08, 0.05, 0.18);
+                const eyeGeo = new THREE.SphereGeometry(0.035, 8, 8); const eyeMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+                const eL = new THREE.Mesh(eyeGeo, eyeMat); eL.position.set(-0.09, 0.05, 0.2);
+                const eR = new THREE.Mesh(eyeGeo, eyeMat); eR.position.set(0.09, 0.05, 0.2);
                 headGroup.add(eL, eR); group.eyes = [eL, eR];
             } else {
-                const hairGeo = new THREE.SphereGeometry(0.23, 16, 16, 0, Math.PI * 2, 0, Math.PI / 1.7);
-                const hair = new THREE.Mesh(hairGeo, new THREE.MeshStandardMaterial({ color: 0x221100, roughness: 0.9 })); hair.scale.set(1.02, 1.05, 1.05); headGroup.add(hair);
+                const hairGeo = new THREE.SphereGeometry(0.25, 16, 16, 0, Math.PI * 2, 0, Math.PI / 1.7);
+                const hair = new THREE.Mesh(hairGeo, new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 })); hair.scale.set(1.02, 1.05, 1.05); headGroup.add(hair);
             }
-            headGroup.position.y = 1.6; group.add(headGroup); group.head = headGroup;
+            headGroup.position.y = 1.65; group.add(headGroup); group.head = headGroup;
             return group;
         }
 
-        function init() {
-            scene = new THREE.Scene(); scene.background = new THREE.Color(0xddeeff); scene.fog = new THREE.Fog(0xddeeff, 10, 45);
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 2.3, 7.0); camera.lookAt(0, 1.1, 0);
-            renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight); document.body.appendChild(renderer.domElement);
+        function init3D() {
+            scene = new THREE.Scene(); scene.background = new THREE.Color(0x132026); scene.fog = new THREE.Fog(0x132026, 15, 50);
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000); camera.position.set(0, 2.5, 7.5); camera.lookAt(0, 1.2, 0);
             
-            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-            const mainLight = new THREE.DirectionalLight(0xfffaed, 0.8); mainLight.position.set(10, 20, 8); scene.add(mainLight);
+            renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true; document.body.appendChild(renderer.domElement);
+            
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            const mainLight = new THREE.DirectionalLight(0xfffaed, 0.7); mainLight.position.set(10, 25, 10); scene.add(mainLight);
+
+            const blackboard = new THREE.Mesh(new THREE.BoxGeometry(16, 4.5, 0.1), new THREE.MeshStandardMaterial({ color: 0x16351c, roughness: 0.8 })); blackboard.position.set(0, 3.2, -21.8); scene.add(blackboard);
 
             const floorCanvas = document.createElement('canvas'); floorCanvas.width = 256; floorCanvas.height = 256;
-            const fCtx = floorCanvas.getContext('2d'); fCtx.fillStyle = '#dfb78c'; fCtx.fillRect(0,0,256,256); fCtx.fillStyle = '#c59b6d';
-            for(let i=0; i<256; i+=32) { fCtx.fillRect(i, 0, 2, 256); }
-            const floorTex = new THREE.CanvasTexture(floorCanvas); floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(10,10);
-            const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.4 })); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+            const fCtx = floorCanvas.getContext('2d'); fCtx.fillStyle = '#b58a55'; fCtx.fillRect(0,0,256,256); fCtx.fillStyle = '#946f41';
+            for(let i=0; i<256; i+=32) { fCtx.fillRect(i, 0, 2, 256); fCtx.fillRect(0, i, 256, 2); }
+            const floorTex = new THREE.CanvasTexture(floorCanvas); floorTex.wrapS = THREE.RepeatWrapping; floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(12,12);
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.5 })); floor.rotation.x = -Math.PI / 2; scene.add(floor);
 
-            const backWall = new THREE.Mesh(new THREE.PlaneGeometry(60, 20), new THREE.MeshStandardMaterial({ color: 0xeceae4, roughness: 0.9 })); backWall.position.set(0, 10, -20); scene.add(backWall);
-            const blackboard = new THREE.Mesh(new THREE.BoxGeometry(14, 4, 0.1), new THREE.MeshStandardMaterial({ color: 0x1e3f20, roughness: 0.7 })); blackboard.position.set(0, 3, -19.8); scene.add(blackboard);
-
-            const deskMat = new THREE.MeshStandardMaterial({ color: 0xb58a55, roughness: 0.5 });
-            const pipeMat = new THREE.MeshStandardMaterial({ color: 0x999999, metalness: 0.6 });
+            const deskMat = new THREE.MeshStandardMaterial({ color: 0xbc9466, roughness: 0.5 });
+            const pipeMat = new THREE.MeshStandardMaterial({ color: 0x777777, metalness: 0.5 });
             
             for (let x = -8; x <= 8; x += 4) {
-                for (let z = -12; z <= 4; z += 4) {
+                for (let z = -14; z <= 2; z += 4) {
                     const deskGroup = new THREE.Group();
                     const top = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 1.4), deskMat); top.position.y = 0.9; deskGroup.add(top);
                     const legGeo = new THREE.BoxGeometry(0.06, 0.9, 0.06);
                     const l1 = new THREE.Mesh(legGeo, pipeMat); l1.position.set(-1.1, 0.45, -0.6); deskGroup.add(l1);
                     const l2 = new THREE.Mesh(legGeo, pipeMat); l2.position.set(1.1, 0.45, -0.6); deskGroup.add(l2);
                     deskGroup.position.set(x, 0, z); scene.add(deskGroup);
-                    if (x !== 0 || z !== 4) {
-                        const s = createDetailedPerson(false); s.position.set(x, 0, z + 1.1); s.rotation.y = Math.PI; s.head.rotation.x = 0.4; scene.add(s); students.push(s);
+                    
+                    if (x !== 0 || z !== 2) {
+                        const s = createDetailedPerson(false); s.position.set(x, 0, z + 1.2); s.rotation.y = Math.PI; s.head.rotation.x = 0.35; scene.add(s); students.push(s);
                     }
                 }
             }
 
-            sensei = createDetailedPerson(true); sensei.position.set(0, 0, -14); scene.add(sensei);
-            setCamoScreen(initialCamo); updateTimerUI();
+            sensei = createDetailedPerson(true); sensei.position.set(0, 0, -15); scene.add(sensei);
+            
+            setCamoScreen(initialCamo); loadSavedNickname(); updatePomoClockUI();
 
             const startAction = (e) => {
-                if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger')) return;
+                if (!gameActive || e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger') || e.target.closest('#pomodoro-toggle-btn') || e.target.closest('#pomodoro-screen')) return;
                 isWatching = true; document.getElementById('screen-study').classList.add('hidden'); document.getElementById('screen-youtube').classList.remove('hidden'); document.getElementById('youtube-device').classList.add('active-view');
             };
             const stopAction = (e) => {
-                if (e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger')) return;
+                if (e.target.closest('#settings-toggle-btn') || e.target.closest('#settings-dialog') || e.target.closest('#ai-dock') || e.target.closest('#gemini-ai-trigger') || e.target.closest('#pomodoro-toggle-btn') || e.target.closest('#pomodoro-screen')) return;
                 isWatching = false; document.getElementById('screen-study').classList.remove('hidden'); document.getElementById('screen-youtube').classList.add('hidden'); document.getElementById('youtube-device').classList.remove('active-view');
             };
             window.addEventListener('mousedown', startAction); window.addEventListener('mouseup', stopAction);
             window.addEventListener('touchstart', startAction); window.addEventListener('touchend', stopAction);
             
-            runBootSequence();
-            animate();
+            runBootSequence(); animate();
         }
 
         function updateAI() {
             const time = Date.now() * 0.005; aiTimer -= 1;
+            
             if (aiState === 'WALK') {
                 let dist = sensei.position.distanceTo(aiTarget);
-                if (dist > 0.3) {
+                if (dist > 0.4) {
                     let dir = aiTarget.clone().sub(sensei.position).normalize();
                     sensei.position.add(dir.multiplyScalar(0.045));
                     sensei.rotation.y = THREE.MathUtils.lerp(sensei.rotation.y, Math.atan2(dir.x, dir.z), 0.1);
                     sensei.legL.rotation.x = Math.sin(time) * 0.45; sensei.legR.rotation.x = Math.cos(time) * 0.45;
-                } else { aiState = 'INSPECT'; aiTimer = 80 + Math.random() * 120; }
+                } else { aiState = 'INSPECT'; aiTimer = 90 + Math.random() * 100; }
             } else if (aiState === 'INSPECT') {
                 sensei.legL.rotation.x = 0; sensei.legR.rotation.x = 0;
-                sensei.head.rotation.y = Math.sin(time * 0.4) * 1.3;
-                if (aiTimer <= 0) { aiState = 'WALK'; aiTarget.set((Math.random() - 0.5) * 12, 0, (Math.random() - 0.5) * 18 - 4); }
+                sensei.head.rotation.y = Math.sin(time * 0.35) * 1.2;
+                if (aiTimer <= 0) { aiState = 'WALK'; aiTarget.set((Math.random() - 0.5) * 10, 0, (Math.random() - 0.5) * 16 - 3); }
             }
 
             const playerPos = new THREE.Vector3(0, 0, 5);
@@ -589,16 +696,16 @@
             if (isWatching) {
                 score += 1; document.getElementById('score-text').innerText = score.toString().padStart(4, '0');
                 document.getElementById('yt-progress').style.width = (score % 100) + "%";
-                if (dot > 0.4 && dist < 15) {
-                    suspicion += 2.5; document.getElementById('warning-vignette').style.opacity = "1";
-                    sensei.eyes.forEach(e => e.material.color.set(0xff2222));
+                if (dot > 0.35 && dist < 16) {
+                    suspicion += 2.2; document.getElementById('warning-vignette').style.opacity = "1";
+                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.set(0xff1111));
                 } else {
-                    suspicion = Math.max(0, suspicion - 0.3); document.getElementById('warning-vignette').style.opacity = "0";
-                    sensei.eyes.forEach(e => e.material.color.set(0x000000));
+                    suspicion = Math.max(0, suspicion - 0.4); document.getElementById('warning-vignette').style.opacity = "0";
+                    if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.set(0x000000));
                 }
             } else {
-                suspicion = Math.max(0, suspicion - 1.2); document.getElementById('warning-vignette').style.opacity = "0";
-                sensei.eyes.forEach(e => e.material.color.set(0x000000));
+                suspicion = Math.max(0, suspicion - 1.5); document.getElementById('warning-vignette').style.opacity = "0";
+                if(sensei.eyes) sensei.eyes.forEach(e => e.material.color.set(0x000000));
             }
             document.getElementById('suspicion-bar').style.width = suspicion + "%";
             if (suspicion >= 100) gameOver();
@@ -607,16 +714,20 @@
         function animate() { requestAnimationFrame(animate); if (gameActive) updateAI(); renderer.render(scene, camera); }
         
         function gameOver() {
-            gameActive = false; document.getElementById('start-screen').style.display = 'flex';
+            gameActive = false; 
+            const userName = getUserName();
+            const startScreen = document.getElementById('start-screen');
+            startScreen.style.display = 'flex';
             document.getElementById('boot-title').innerText = "DISMISSED";
-            document.getElementById('boot-sub').innerHTML = `<span class='text-red-400 font-black text-3xl'>Score: ${score}</span><br><br>大網先生「...お前、そこまでして動画が見たいか？」`;
-            document.getElementById('start-btn').innerHTML = `<span class="material-icons-outlined">refresh</span>反省して再入室`; isWatching = false;
+            document.getElementById('boot-sub').innerHTML = `<span class='text-red-400 font-black text-3xl'>Score: ${score}</span><br><br>大網先生「...${userName}、そこまでして動画が見たいか？」`;
+            document.getElementById('start-btn').innerHTML = `<span class="material-icons-outlined">refresh</span>反省して再入室`; 
+            isWatching = false;
         }
 
         document.getElementById('start-btn').onclick = () => { score = 0; suspicion = 0; gameActive = true; document.getElementById('start-screen').style.display = 'none'; };
         document.getElementById('auth-btn').onclick = function() { Notification.requestPermission().then(p => { if(p==='granted') { document.getElementById('start-btn').disabled=false; document.getElementById('start-btn').classList.remove('opacity-40'); this.style.display='none'; } }); };
         window.onresize = () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); };
-        window.onload = init;
+        window.onload = init3D;
     </script>
 </body>
 </html>
