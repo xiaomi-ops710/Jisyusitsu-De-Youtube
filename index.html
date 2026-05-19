@@ -319,7 +319,8 @@
     </div>
 
     <script>
-        const GEMINI_API_KEY = "AIzaSyA9eQLOWdnG7PQxVOd9c8-htnxhSqbvP6w";
+        // 🔗 💡 ここにステップ3で発行されたGASの「ウェブアプリURL」を貼り付けてください！
+        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxql9l99XK7lnkjd8saa_cD6OlsS9A763BRUYO0zG_0_q2QqEYl_R590c7zc2zJ2Eja8g/exec"; 
         let initialCamo = "math";
 
         let audioCtx = null;
@@ -587,7 +588,7 @@
             if(container) container.innerHTML = camoTemplates[type];
         }
 
-        // --- 🛠️ Ami AI コントロール（デバッグ強化版） ---
+        // --- 🛠️ Ami AI コントロール（GAS中継対応型） ---
         let selectedBase64Image = null;
         const aiTrigger = document.getElementById('gemini-ai-trigger');
         const aiDock = document.getElementById('ai-dock');
@@ -628,7 +629,11 @@
             playSoundTap();
             const textInput = document.getElementById('ai-text-input').value.trim();
             const userName = getUserName();
-            if (!GEMINI_API_KEY || GEMINI_API_KEY.includes("ここにGeminiの")) { alert('Ami AIの稼働にはAPIキーの設定が必要です。'); return; }
+            
+            if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("ここにGASのウェブアプリURL")) { 
+                alert('GASのウェブアプリURLが未設定です。コードの最上部付近にデプロイしたURLを貼り付けてください。'); 
+                return; 
+            }
             if (!textInput && !selectedBase64Image) return;
 
             const chatLog = document.getElementById('ai-chat-log');
@@ -646,24 +651,29 @@
             }
 
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-                    method: 'POST', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: parts }] })
+                // 🌟 GASのdoPostに向けて、組み立てたデータをPOSTで投げる
+                const payload = { contents: [{ parts: parts }] };
+
+                const response = await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
                 });
                 
                 selectedBase64Image = null;
                 document.getElementById('ai-file-input').value = "";
                 document.getElementById('file-preview-name').classList.add('hidden');
 
-                // 🛠️ 強化ポイント：レスポンスがNG（400系、500系など）の場合、Googleの生の怒り（エラーJSON）を剥ぎ取る
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    const errorMsg = errorData.error?.message || `Status ${response.status}`;
-                    throw new Error(errorMsg);
+                    throw new Error(`GASとの通信に失敗: Status ${response.status}`);
                 }
                 
                 const data = await response.json();
+                
+                // GAS内部やGemini APIから返ってきたエラーのハンドリング
+                if (data.error) {
+                    throw new Error(data.error.message || JSON.stringify(data.error));
+                }
+                
                 const replyText = data.candidates[0].content.parts[0].text;
                 
                 systemMsgHtml.classList.remove('animate-pulse'); 
@@ -676,9 +686,7 @@
                 
                 systemMsgHtml.classList.remove('animate-pulse');
                 systemMsgHtml.className = "text-amber-400 mb-2 font-mono text-xs p-2 bg-black/40 border border-amber-500/30 rounded-lg"; 
-                
-                // 🛠️ 強化ポイント：大網先生がダイレクトにGoogle側の真のエラー内容を暴露
-                systemMsgHtml.innerText = `大網先生「おい通信エラーだ！Googleの返答：${err.message}」`;
+                systemMsgHtml.innerText = `大網先生「おいエラーだ！原因：${err.message}」`;
             }
         };
 
