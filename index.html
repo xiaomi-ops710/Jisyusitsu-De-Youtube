@@ -23,7 +23,6 @@
             overflow: hidden; 
             background: #060d10; 
             width: 100vw; 
-            /* iPadのキーボードバグを防ぐためJS側で高さを厳密に制御するが初期値は100% */
             height: 100%;
             position: fixed;
             top: 0;
@@ -38,7 +37,6 @@
             box-sizing: border-box;
         }
 
-        /* 画面全体の絶対的な受け皿 */
         #app-viewport-wrapper {
             position: absolute;
             top: 0;
@@ -48,7 +46,6 @@
             overflow: hidden;
         }
 
-        /* iPad横画面・キーボード追従バグ完全対策用キャンバス */
         canvas {
             position: absolute;
             top: 0;
@@ -69,12 +66,10 @@
             box-sizing: border-box; 
         }
         
-        /* --- Material 3 Design System --- */
         .m3-hud { background: rgba(26, 43, 53, 0.85); backdrop-filter: blur(24px); border-radius: 24px; color: #e1e3e5; padding: 14px 24px; box-shadow: 0 12px 32px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.08); }
         .m3-dialog { background: #172a35; color: #e1e3e5; border-radius: 28px; box-shadow: 0px 16px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .m3-card { background: #223a47; border-radius: 16px; border: 1px solid #3d5866; }
         
-        /* Buttons & Inputs */
         .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
         .m3-btn-primary:hover { background: #b3e5ff; transform: scale(1.02); }
         .m3-btn-primary:disabled { opacity: 0.4; pointer-events: none; }
@@ -84,7 +79,6 @@
         .m3-btn-icon:hover { background: #2f4a57; }
         .m3-input { background: #0b151b; border: 1px solid #717d84; color: #e1e3e5; border-radius: 12px; padding: 12px 16px; transition: all 0.2s; pointer-events: auto; }
         
-        /* カモフラージュスマホデバイス */
         #youtube-device { position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%); width: 440px; height: 250px; border-radius: 36px; overflow: hidden; border: 12px solid #1a2b35; background: #fff; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .active-view { transform: translateX(-50%) translateY(-20px) scale(1.05); }
         #warning-vignette { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle, transparent 20%, rgba(255, 10, 10, 0.6) 100%); opacity: 0; transition: opacity 0.1s; z-index: 40; }
@@ -100,7 +94,6 @@
         #gemini-ai-trigger.click-pop { transform: scale(0.85) translateY(10px); opacity: 0.6; }
         @keyframes geminiGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
-        /* Ami AI サイドバー */
         #ai-dock { 
             position: absolute; top: 0; right: 0; width: 420px; height: 100%;
             background: rgba(23, 42, 53, 0.97); backdrop-filter: blur(24px);
@@ -113,7 +106,6 @@
 
         #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 12px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 130px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.7); padding: 14px; border-radius: 12px; border: 1px solid rgba(255, 50, 50, 0.2); box-sizing: border-box; }
         
-        /* 🚨 ホラー・スリリング演出用アニメーション群 */
         .glitch-title { font-size: 3.5rem; font-weight: 900; font-style: italic; letter-spacing: -2px; color: #ff4d4d; text-shadow: 0 0 15px rgba(255, 10, 10, 0.7); animation: horrorGlitch 0.3s infinite alternate; }
         .scary-sub { color: #ffb3b3; animation: textShaker 0.5s infinite; font-weight: 500; }
         .pulse-sensei { animation: heartBeat 1.2s infinite ease-in-out; }
@@ -141,7 +133,6 @@
             50% { background-color: #140406; }
         }
         .bg-pulse-horror { animation: backgroundPulse 4s infinite ease-in-out; }
-
         .boot-scanline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(255, 0, 0, 0.04) 50%); background-size: 100% 6px; z-index: 510; pointer-events: none; }
     </style>
 </head>
@@ -331,7 +322,6 @@
         const GEMINI_API_KEY = "AIzaSyA9eQLOWdnG7PQxVOd9c8-htnxhSqbvP6w";
         let initialCamo = "math";
 
-        // --- 🔊 Web Audio API リアルタイム効果音生成システム ---
         let audioCtx = null;
         function initAudio() {
             if (!audioCtx) {
@@ -494,7 +484,6 @@
             }
         }
 
-        // ポモドーロタイマー
         let pomoMinutesStudy = 25;
         let pomoMinutesBreak = 5;
         let pomoSecondsLeft = pomoMinutesStudy * 60;
@@ -598,7 +587,7 @@
             if(container) container.innerHTML = camoTemplates[type];
         }
 
-        // Ami AI コントロール
+        // --- 🛠️ Ami AI コントロール（デバッグ強化版） ---
         let selectedBase64Image = null;
         const aiTrigger = document.getElementById('gemini-ai-trigger');
         const aiDock = document.getElementById('ai-dock');
@@ -651,7 +640,6 @@
             systemMsgHtml.innerText = "大網先生が答案の不備を精責中..."; chatLog.appendChild(systemMsgHtml);
             chatLog.scrollTop = chatLog.scrollHeight;
 
-            // 🛠️ APIバグ完全対策：画像データを格納した配列を直前まで完全に保持させる
             let parts = [{ text: `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（名前:${userName}）からの質問に徹底的に数式や内容を解説しつつ、適度にお説教を織り交ぜて回答してください。\n質問: ${textInput || "添付した画像を確認しろ"}` }];
             if (selectedBase64Image) {
                 parts.unshift({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
@@ -664,12 +652,17 @@
                     body: JSON.stringify({ contents: [{ parts: parts }] })
                 });
                 
-                // 🛠️ リセット処理はfetchのbody生成が終わった「このタイミング」で行うのが正解！
                 selectedBase64Image = null;
                 document.getElementById('ai-file-input').value = "";
                 document.getElementById('file-preview-name').classList.add('hidden');
 
-                if (!response.ok) throw new Error("API Error");
+                // 🛠️ 強化ポイント：レスポンスがNG（400系、500系など）の場合、Googleの生の怒り（エラーJSON）を剥ぎ取る
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    const errorMsg = errorData.error?.message || `Status ${response.status}`;
+                    throw new Error(errorMsg);
+                }
+                
                 const data = await response.json();
                 const replyText = data.candidates[0].content.parts[0].text;
                 
@@ -677,14 +670,15 @@
                 systemMsgHtml.className = "text-red-300 font-bold mb-2";
                 typeWriterEffect(systemMsgHtml, `大網先生「${replyText}`);
             } catch (err) {
-                // エラー時も安全のためにファイルバッファをリセット
                 selectedBase64Image = null;
                 document.getElementById('ai-file-input').value = "";
                 document.getElementById('file-preview-name').classList.add('hidden');
                 
                 systemMsgHtml.classList.remove('animate-pulse');
-                systemMsgHtml.className = "text-amber-400 mb-2"; 
-                systemMsgHtml.innerText = "大網先生「通信エラーだ！キーが間違っているか、記述に不備があるぞ！」";
+                systemMsgHtml.className = "text-amber-400 mb-2 font-mono text-xs p-2 bg-black/40 border border-amber-500/30 rounded-lg"; 
+                
+                // 🛠️ 強化ポイント：大網先生がダイレクトにGoogle側の真のエラー内容を暴露
+                systemMsgHtml.innerText = `大網先生「おい通信エラーだ！Googleの返答：${err.message}」`;
             }
         };
 
@@ -854,7 +848,6 @@
             const savedName = localStorage.getItem('userNickname');
             if (savedName) document.getElementById('user-nickname-input').value = savedName;
             
-            // iPadOSのビューポートサイズ同期を初期化時に実行
             syncViewportHeight();
 
             const startAction = (e) => {
@@ -977,13 +970,11 @@
             Notification.requestPermission().then(p => { if(p==='granted') activateStartButton(); }); 
         };
         
-        // 🛠️ iPadのソフトウェアキーボードによる「高低差・下部余白バグ」を完全に無効化する最強ロジック
         function syncViewportHeight() {
             const wrapper = document.getElementById('app-viewport-wrapper');
             if (!wrapper) return;
 
             if (window.visualViewport) {
-                // キーボードの有無に関わらず、今目に見えている「真の表示領域」のサイズを px で直撃上書き
                 const vvHeight = window.visualViewport.height;
                 const vvWidth = window.visualViewport.width;
 
@@ -991,7 +982,6 @@
                 wrapper.style.width = `${vvWidth}px`;
                 document.body.style.height = `${vvHeight}px`;
 
-                // Three.js側のカメラと解像度も、この「真のサイズ」にぴったり追従させる
                 if (camera && renderer) {
                     camera.aspect = vvWidth / vvHeight;
                     camera.updateProjectionMatrix();
@@ -1002,7 +992,6 @@
                 wrapper.style.height = `${wHeight}px`;
                 document.body.style.height = `${wHeight}px`;
             }
-            // iPadOSのスクロール跳ね返り現象を封印
             window.scrollTo(0, 0);
         }
 
