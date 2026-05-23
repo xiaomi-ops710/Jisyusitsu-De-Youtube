@@ -70,14 +70,15 @@
         .m3-dialog { background: #172a35; color: #e1e3e5; border-radius: 28px; box-shadow: 0px 16px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .m3-card { background: #223a47; border-radius: 16px; border: 1px solid #3d5866; }
         
-        .m3-btn-primary { background: #7cd4ff; color: #003547; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
-        .m3-btn-primary:hover { background: #b3e5ff; transform: scale(1.02); }
+        .m3-btn-primary { background: #2563eb; color: #ffffff; border-radius: 100px; font-weight: 700; transition: all 0.25s; padding: 14px 32px; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
+        .m3-btn-primary:hover { background: #3b82f6; transform: scale(1.02); }
         .m3-btn-primary:disabled { opacity: 0.4; pointer-events: none; }
         .m3-btn-tonal { background: #2f4a57; color: #bbe6ff; border-radius: 100px; font-weight: 500; transition: all 0.2s; padding: 12px 28px; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; justify-content: center; touch-action: manipulation; pointer-events: auto; }
         .m3-btn-tonal:hover { background: #3f6071; }
         .m3-btn-icon { background: #172a35; color: #bbe6ff; border-radius: 100px; transition: all 0.2s; border: 1px solid #3d5866; z-index: 250; pointer-events: auto; touch-action: manipulation; }
         .m3-btn-icon:hover { background: #2f4a57; }
-        .m3-input { background: #0b151b; border: 1px solid #717d84; color: #e1e3e5; border-radius: 12px; padding: 12px 16px; transition: all 0.2s; pointer-events: auto; }
+        .m3-input { background: #13242e; border: 1px solid #3d5866; color: #e1e3e5; border-radius: 9999px; padding: 12px 24px; transition: all 0.2s; pointer-events: auto; }
+        .m3-input:focus { outline: none; border-color: #2563eb; background: #192f3c; }
         
         #youtube-device { position: absolute; bottom: 22%; left: 50%; transform: translateX(-50%); width: 440px; height: 250px; border-radius: 36px; overflow: hidden; border: 12px solid #1a2b35; background: #fff; box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .active-view { transform: translateX(-50%) translateY(-20px) scale(1.05); }
@@ -94,16 +95,53 @@
         #gemini-ai-trigger.click-pop { transform: scale(0.85) translateY(10px); opacity: 0.6; }
         @keyframes geminiGradient { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         
+        /* 🤖 改修版 Ami AI サイドバー基本設計 */
         #ai-dock { 
-            position: absolute; top: 0; right: 0; width: 420px; height: 100%;
-            background: rgba(23, 42, 53, 0.97); backdrop-filter: blur(24px);
-            z-index: 150; border-left: 1px solid rgba(255,255,255,0.1); 
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); 
+            position: absolute; top: 0; right: 0; width: 440px; height: 100%;
+            background: #111e25;
+            z-index: 150; border-left: 1px solid rgba(255,255,255,0.08); 
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); 
             box-shadow: -15px 0 50px rgba(0,0,0,0.6); display: flex; flex-direction: column;
         }
-        .ai-collapsed { transform: translateX(420px); }
-        .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
+        .ai-collapsed { transform: translateX(100%); }
+        
+        /* 🔥 全画面表示モード切替スタイル */
+        #ai-dock.full-screen-mode {
+            width: 100vw !important;
+            border-left: none;
+        }
 
+        /* 💬 左右対照チャット風UI */
+        .chat-msg-row { display: flex; width: 100%; margin-bottom: 20px; align-items: flex-start; }
+        .chat-msg-row.user-row { justify-content: flex-end; }
+        .chat-msg-row.sensei-row { justify-content: flex-start; }
+        
+        .chat-bubble { max-width: 70%; padding: 14px 20px; border-radius: 24px; font-size: 0.95rem; line-height: 1.6; word-wrap: break-word; }
+        
+        /* ユーザー：右側・青系バブル */
+        .user-row .chat-bubble { background: #1e3a8a; color: #f8fafc; border-top-right-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        /* 大網先生：左側・ダークグレー系バブル */
+        .sensei-row .chat-bubble { background: #2a2e35; color: #e2e8f0; border-top-left-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        
+        /* アカウントアイコン */
+        .chat-avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+        .user-row .chat-avatar { background: #3b82f6; margin-left: 12px; order: 2; font-size: 20px; color: white; }
+        .user-row .chat-bubble { order: 1; }
+        .sensei-row .chat-avatar { background: #475569; margin-right: 12px; font-size: 20px; }
+
+        /* ⏳ 分析中（ローディング）ステータス表示 */
+        .status-container { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #94a3b8; margin-left: 12px; margin-top: 8px; font-weight: bold; }
+        .dot-pulse { display: flex; gap: 4px; }
+        .dot-pulse span { wIdth: 6px; height: 6px; background-color: #94a3b8; border-radius: 50%; animation: pulse 1.4s infinite ease-in-out both; }
+        .dot-pulse span:nth-child(1) { animation-delay: -0.32s; }
+        .dot-pulse span:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes pulse { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+
+        /* 音声入力中のアニメーション */
+        @keyframes micPulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .mic-active { animation: micPulse 1.5s infinite; background: #ef4444 !important; color: white !important; }
+
+        .vertical-text { writing-mode: vertical-rl; text-orientation: upright; }
         #boot-log-container { font-family: 'Roboto Mono', monospace; font-size: 12px; color: #7cd4ff; text-align: left; width: 100%; max-width: 500px; height: 130px; overflow: hidden; margin-bottom: 20px; background: rgba(0,0,0,0.7); padding: 14px; border-radius: 12px; border: 1px solid rgba(255, 50, 50, 0.2); box-sizing: border-box; }
         
         .glitch-title { font-size: 3.5rem; font-weight: 900; font-style: italic; letter-spacing: -2px; color: #ff4d4d; text-shadow: 0 0 15px rgba(255, 10, 10, 0.7); animation: horrorGlitch 0.3s infinite alternate; }
@@ -188,36 +226,56 @@
         <div id="warning-vignette"></div>
 
         <div id="ai-dock" class="ai-collapsed p-6 pointer-events-auto">
-            <div class="flex items-center justify-between pb-4 border-b border-[#3d5866] mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="text-base font-bold text-white flex items-center gap-1.5">
-                        <span class="material-icons-outlined text-xl text-[#7cd4ff]">smart_toy</span> Ami AI
-                    </div>
-                    <span class="text-[10px] bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full font-black tracking-wider uppercase shadow-sm">Beta</span>
-                </div>
-                <button id="ai-close-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-[#bbe6ff]">
-                    <span class="material-icons-outlined text-2xl">close</span>
-                </button>
-            </div>
-            
-            <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0b151b] rounded-2xl text-sm space-y-3 border border-[#3d5866] text-[#e1e3e5] font-mono">
-                <div id="ai-greeting-text" class="text-red-300 font-bold">大網先生「ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？」</div>
-            </div>
-
-            <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-700/50 mb-4">
                 <div class="flex items-center gap-3">
-                    <label class="w-12 h-12 m3-btn-tonal rounded-full cursor-pointer flex items-center justify-center text-[#bbe6ff] p-0">
-                        <span class="material-icons-outlined text-2xl">add_photo_alternate</span>
-                        <input type="file" id="ai-file-input" accept="image/*" class="hidden">
-                    </label>
-                    <div id="file-preview-name" class="text-xs text-[#bbe6ff] truncate italic hidden"></div>
+                    <div class="text-3xl">🤖</div>
+                    <div class="flex flex-col">
+                        <div class="text-xl font-bold text-white tracking-wide">Ami AI</div>
+                        <span class="text-xs text-slate-400 font-medium">Powered By Gemini 3.5 Flash API</span>
+                    </div>
                 </div>
+                
                 <div class="flex items-center gap-2">
-                    <input type="text" id="ai-text-input" placeholder="解けない問題をここに打ち込め..." class="flex-grow m3-input rounded-full text-sm px-5 h-12">
-                    <button id="ai-send-btn" class="w-12 h-12 m3-btn-primary rounded-full flex items-center justify-center p-0">
-                        <span class="material-icons-outlined text-xl">send</span>
+                    <button id="ai-fullscreen-btn" class="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-slate-800/60 hover:bg-slate-700/80 text-slate-300 transition-colors" title="全画面表示">
+                        <span class="material-icons-outlined text-xl">fullscreen</span>
+                        <span class="text-[9px] font-bold mt-0.5">全画面</span>
+                    </button>
+                    <button id="ai-close-sidebar" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 text-slate-400">
+                        <span class="material-icons-outlined text-2xl">close</span>
                     </button>
                 </div>
+            </div>
+            
+            <div id="ai-chat-log" class="flex-grow overflow-y-auto mb-4 p-4 bg-[#0a1216] rounded-2xl border border-slate-800 flex flex-col">
+                <div class="chat-msg-row sensei-row">
+                    <div class="chat-avatar">👨‍🦲</div>
+                    <div class="chat-bubble">ほう、自習室の帝王たる私に何か質問か？それとも言い訳か？</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 bg-[#16252e] p-3 rounded-2xl border border-slate-700/30">
+                <div class="flex flex-col items-center">
+                    <button id="ai-mic-btn" class="w-12 h-12 bg-slate-700/60 hover:bg-slate-600/80 text-white rounded-full flex items-center justify-center transition-all shadow-md" title="音声入力">
+                        <span class="material-icons-outlined text-xl" id="mic-icon">mic</span>
+                    </button>
+                    <span class="text-[9px] text-slate-400 font-bold mt-1">音声入力</span>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <label class="w-12 h-12 bg-slate-700/60 hover:bg-slate-600/80 text-white rounded-full cursor-pointer flex items-center justify-center transition-colors shadow-md" title="画像を添付">
+                        <span class="material-icons-outlined text-xl">image</span>
+                        <input type="file" id="ai-file-input" accept="image/*" class="hidden">
+                    </label>
+                    <span class="text-[9px] text-slate-400 font-bold mt-1" id="file-label-text">画像を添付</span>
+                </div>
+                
+                <div class="flex-grow relative">
+                    <input type="text" id="ai-text-input" placeholder="解けない問題をここに打ち込め..." class="w-full m3-input text-sm h-12 pr-4">
+                </div>
+                
+                <button id="ai-send-btn" class="h-12 px-5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full flex items-center justify-center shadow-md transition-colors text-sm">
+                    送信
+                </button>
             </div>
         </div>
 
@@ -274,11 +332,6 @@
                     </div>
 
                     <div class="p-5 m3-card">
-                        <h3 class="text-base font-bold text-[#7cd4ff] mb-2 flex items-center gap-2"><span class="material-icons-outlined">campaign</span> 監視連動システムテスト</h3>
-                        <button id="test-notification-btn" class="w-full m3-btn-tonal py-3 text-sm"><span class="material-icons-outlined text-sm">notifications_active</span> テスト通知を送信する</button>
-                    </div>
-
-                    <div class="p-5 m3-card">
                         <h3 class="text-base font-bold text-[#7cd4ff] mb-3 flex items-center gap-2"><span class="material-icons-outlined">menu_book</span> カモフラージュ画面選択</h3>
                         <div class="space-y-2 text-sm text-[#e1e3e5]">
                             <label class="flex items-center justify-between p-2.5 rounded hover:bg-white/5 cursor-pointer">
@@ -319,7 +372,7 @@
     </div>
 
     <script>
-        // 🔗 💡 ここにステップ3で発行されたGASの「ウェブアプリURL」を貼り付けてください！
+        // 🔗 💡 ここにGASのウェブアプリURLを貼り付けてください！
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxql9l99XK7lnkjd8saa_cD6OlsS9A763BRUYO0zG_0_q2QqEYl_R590c7zc2zJ2Eja8g/exec"; 
         let initialCamo = "math";
 
@@ -560,11 +613,6 @@
             }
         }
 
-        document.getElementById('test-notification-btn').onclick = () => {
-            playSoundTap();
-            triggerPushNotification('🔥 大網先生の常時監視テスト', `「おい${getUserName()}！通知システム同期完了だ。サボったら即座に雷を落とすからな！」`);
-        };
-
         window.addEventListener('focus', () => {
             const userName = getUserName();
             const lastTime = localStorage.getItem('lastActiveTime');
@@ -588,12 +636,19 @@
             if(container) container.innerHTML = camoTemplates[type];
         }
 
-        // --- 🛠️ Ami AI コントロール（GAS中継対応型） ---
+        // --- 🛠️ 新 Ami AI コントロール（GAS中継・対照チャットUI・音声・画像・全画面対応） ---
         let selectedBase64Image = null;
         const aiTrigger = document.getElementById('gemini-ai-trigger');
         const aiDock = document.getElementById('ai-dock');
         const aiCloseBtn = document.getElementById('ai-close-sidebar');
+        const aiFullscreenBtn = document.getElementById('ai-fullscreen-btn');
+        const chatLog = document.getElementById('ai-chat-log');
+        const micBtn = document.getElementById('ai-mic-btn');
+        const micIcon = document.getElementById('mic-icon');
+        const fileInput = document.getElementById('ai-file-input');
+        const fileLabelText = document.getElementById('file-label-text');
         
+        // サイドバー開閉
         aiTrigger.onclick = (e) => { 
             e.stopPropagation(); 
             playSoundTap();
@@ -602,56 +657,153 @@
         };
         aiCloseBtn.onclick = () => { playSoundTap(); aiDock.classList.add('ai-collapsed'); };
 
-        document.getElementById('ai-file-input').onchange = (e) => {
+        // 🖥️ 全画面表示トグル切替
+        aiFullscreenBtn.onclick = () => {
+            playSoundTap();
+            aiDock.classList.toggle('full-screen-mode');
+            
+            const iconSpan = aiFullscreenBtn.querySelector('.material-icons-outlined');
+            const textSpan = aiFullscreenBtn.querySelector('span:not(.material-icons-outlined)');
+            
+            if(aiDock.classList.contains('full-screen-mode')) {
+                iconSpan.innerText = 'fullscreen_exit';
+                textSpan.innerText = '通常画面';
+            } else {
+                iconSpan.innerText = 'fullscreen';
+                textSpan.innerText = '全画面';
+            }
+        };
+
+        // 画像ファイル添付処理
+        fileInput.onchange = (e) => {
             const file = e.target.files[0]; if (!file) return;
-            document.getElementById('file-preview-name').innerText = `📎 ${file.name}`;
-            document.getElementById('file-preview-name').classList.remove('hidden');
+            fileLabelText.innerText = "添付あり";
+            fileLabelText.classList.add('text-blue-400');
             const reader = new FileReader();
             reader.onload = (evt) => selectedBase64Image = evt.target.result.split(',')[1];
             reader.readAsDataURL(file);
         };
 
-        function typeWriterEffect(element, fullText, speed = 20) {
+        // 音声認識機能 (Web Speech API)
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isListening = false;
+
+        if (SpeechRecognition) {
+            recognition = new SpeechRecognition();
+            recognition.lang = 'ja-JP';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                isListening = true;
+                micBtn.classList.add('mic-active');
+                micIcon.innerText = 'graphic_eq';
+            };
+
+            recognition.onresult = (event) => {
+                const speechResult = event.results[0][0].transcript;
+                document.getElementById('ai-text-input').value = speechResult;
+            };
+
+            recognition.onerror = (event) => {
+                console.error("Speech Recognition Error: ", event.error);
+            };
+
+            recognition.onend = () => {
+                isListening = false;
+                micBtn.classList.remove('mic-active');
+                micIcon.innerText = 'mic';
+            };
+
+            micBtn.onclick = () => {
+                playSoundTap();
+                if (isListening) {
+                    recognition.stop();
+                } else {
+                    recognition.start();
+                }
+            };
+        } else {
+            micBtn.title = "音声認識未対応ブラウザ";
+            micBtn.onclick = () => alert("お使いの環境は音声認識（Web Speech API）に対応していません。");
+        }
+
+        // 文字のタイピング効果
+        function typeWriterEffect(element, fullText, speed = 12) {
             let i = 0; element.innerHTML = "";
             function type() {
                 if (i < fullText.length) {
                     if (fullText.substr(i, 4) === "<br>") { element.innerHTML += "<br>"; i += 4; }
                     else if (fullText.charAt(i) === "\n") { element.innerHTML += "<br>"; i++; }
                     else { element.innerHTML += fullText.charAt(i); i++; }
-                    document.getElementById('ai-chat-log').scrollTop = document.getElementById('ai-chat-log').scrollHeight;
+                    chatLog.scrollTop = chatLog.scrollHeight;
                     setTimeout(type, speed);
                 }
             }
             type();
         }
 
+        // メッセージ送信処理
         document.getElementById('ai-send-btn').onclick = async () => {
             playSoundTap();
             const textInput = document.getElementById('ai-text-input').value.trim();
             const userName = getUserName();
             
             if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes("ここにGASのウェブアプリURL")) { 
-                alert('GASのウェブアプリURLが未設定です。コードの最上部付近にデプロイしたURLを貼り付けてください。'); 
+                alert('GASのウェブアプリURLを設定してください。'); 
                 return; 
             }
             if (!textInput && !selectedBase64Image) return;
 
-            const chatLog = document.getElementById('ai-chat-log');
-            const userMsgHtml = document.createElement('div'); userMsgHtml.className = "text-slate-400 mb-2";
-            userMsgHtml.innerText = `${userName}「${textInput || "（課題画像を提出）"}」`;
-            chatLog.appendChild(userMsgHtml); document.getElementById('ai-text-input').value = "";
-
-            const systemMsgHtml = document.createElement('div'); systemMsgHtml.className = "text-[#7cd4ff] animate-pulse font-bold mb-2";
-            systemMsgHtml.innerText = "大網先生が答案の不備を精責中..."; chatLog.appendChild(systemMsgHtml);
+            // 1. ユーザーメッセージを右側に生成
+            const userRow = document.createElement('div');
+            userRow.className = "chat-msg-row user-row";
+            
+            const userAvatar = document.createElement('div');
+            userAvatar.className = "chat-avatar";
+            userAvatar.innerText = "👤"; // ユーザーアイコン
+            
+            const userBubble = document.createElement('div');
+            userBubble.className = "chat-bubble";
+            userBubble.innerText = textInput || "（画像を送信しました）";
+            
+            userRow.appendChild(userAvatar);
+            userRow.appendChild(userBubble);
+            chatLog.appendChild(userRow);
+            
+            document.getElementById('ai-text-input').value = "";
             chatLog.scrollTop = chatLog.scrollHeight;
 
-            let parts = [{ text: `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（名前:${userName}）からの質問に徹底的に数式や内容を解説しつつ、適度にお説教を織り交ぜて回答してください。\n質問: ${textInput || "添付した画像を確認しろ"}` }];
+            // 2. 大網先生の「思考中」バブル ＆ 画像通りの「分析中」ステータスを左側に生成
+            const senseiRow = document.createElement('div');
+            senseiRow.className = "chat-msg-row sensei-row";
+            
+            const avatar = document.createElement('div');
+            avatar.className = "chat-avatar";
+            avatar.innerText = "👨‍🦲";
+            
+            const senseiBubble = document.createElement('div');
+            senseiBubble.className = "chat-bubble text-slate-400 italic";
+            senseiBubble.innerText = "思考中...";
+            
+            // ⏳ 画像に合ったアニメーション付き「分析中」表示
+            const statusIndicator = document.createElement('div');
+            statusIndicator.className = "status-container";
+            statusIndicator.innerHTML = `<span>分析中</span><div class="dot-pulse"><span></span><span></span><span></span></div>`;
+            
+            senseiRow.appendChild(avatar);
+            senseiRow.appendChild(senseiBubble);
+            senseiRow.appendChild(statusIndicator); // 横に並べる
+            chatLog.appendChild(senseiRow);
+            chatLog.scrollTop = chatLog.scrollHeight;
+
+            let parts = [{ text: `あなたは非常に厳格で威圧的な塾講師「大網先生」です。ユーザー（名前:${userName}）からの質問に徹底的に数式や内容を細かく解説しつつ、適度にお説教や叱咤激励を織り交ぜて回答してください。\n質問: ${textInput || "添付した画像を確認しろ"}` }];
             if (selectedBase64Image) {
                 parts.unshift({ inlineData: { mimeType: "image/jpeg", data: selectedBase64Image } });
             }
 
             try {
-                // 🌟 GASのdoPostに向けて、組み立てたデータをPOSTで投げる
                 const payload = { contents: [{ parts: parts }] };
 
                 const response = await fetch(GAS_WEB_APP_URL, {
@@ -659,34 +811,33 @@
                     body: JSON.stringify(payload)
                 });
                 
+                // 添付リセット
                 selectedBase64Image = null;
-                document.getElementById('ai-file-input').value = "";
-                document.getElementById('file-preview-name').classList.add('hidden');
+                fileInput.value = "";
+                fileLabelText.innerText = "画像を添付";
+                fileLabelText.classList.remove('text-blue-400');
 
-                if (!response.ok) {
-                    throw new Error(`GASとの通信に失敗: Status ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Status ${response.status}`);
                 
                 const data = await response.json();
-                
-                // GAS内部やGemini APIから返ってきたエラーのハンドリング
-                if (data.error) {
-                    throw new Error(data.error.message || JSON.stringify(data.error));
-                }
+                if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
                 
                 const replyText = data.candidates[0].content.parts[0].text;
                 
-                systemMsgHtml.classList.remove('animate-pulse'); 
-                systemMsgHtml.className = "text-red-300 font-bold mb-2";
-                typeWriterEffect(systemMsgHtml, `大網先生「${replyText}`);
+                // 通信成功：分析中を消してテキストを展開
+                statusIndicator.remove();
+                senseiBubble.classList.remove('text-slate-400', 'italic');
+                typeWriterEffect(senseiBubble, replyText);
+
             } catch (err) {
                 selectedBase64Image = null;
-                document.getElementById('ai-file-input').value = "";
-                document.getElementById('file-preview-name').classList.add('hidden');
+                fileInput.value = "";
+                fileLabelText.innerText = "画像を添付";
+                fileLabelText.classList.remove('text-blue-400');
                 
-                systemMsgHtml.classList.remove('animate-pulse');
-                systemMsgHtml.className = "text-amber-400 mb-2 font-mono text-xs p-2 bg-black/40 border border-amber-500/30 rounded-lg"; 
-                systemMsgHtml.innerText = `大網先生「おいエラーだ！原因：${err.message}」`;
+                statusIndicator.remove();
+                senseiBubble.className = "chat-bubble bg-red-950 text-red-400 font-mono text-xs";
+                senseiBubble.innerText = `エラーが発生したぞ！設定を確認しろ：${err.message}`;
             }
         };
 
